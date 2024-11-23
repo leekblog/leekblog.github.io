@@ -1,0 +1,95 @@
+@charset "utf-8";
+
+@font-face {
+    font-family: "myfont";
+    src: url("/css/JinzisheTongfang-Regular.ttf");
+}
+
+html,
+body {
+    margin: 0 auto;
+    padding: 0 auto;
+    font-size: 12px;
+    /* font-family: Courier New,MS UI Gothic; */
+    /* font-family: "myfont"; */
+    font-family: Courier New,monospace;
+    font-weight: 300;
+    color: #292929;
+    max-width: 50rem;
+    width: 96%;
+}
+
+hr {
+    border-top: none;
+    border-bottom: 1px solid #c0c0c0;
+}
+
+.title {
+    font-size: 2rem;
+    line-height: 0rem;
+}
+
+.title>span {
+    font-size: 1.2rem;
+}
+
+main>a {
+    width: 100%;
+    text-decoration: none;
+    font-size: 1.2rem;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    line-height: 3rem;
+}
+main>a:link{
+    color: #292929;
+}
+
+
+main>a::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    /* 根据需要调整垂直位置 */
+    left: 0;
+    right: 0;
+    height: 2px;
+    /* 虚线的“厚度” */
+    background-image: linear-gradient(to right, #c0c0c0 50%, #ffffff00 0%);
+    background-size: 4px 1px;
+    /* 虚线的宽度和高度（这里的高度应与上面的height相匹配） */
+    background-repeat: repeat-x;
+    transform: translateY(-50%);
+    /* 使虚线垂直居中于文字 */
+    z-index: -1;
+    /* 将虚线放在文字下面 */
+}
+
+main>a>span:first-child {
+    background: white;
+}
+
+main>a>span:last-child {
+    float: right;
+    background: white;
+}
+
+main {
+    margin-top: 1rem;
+}
+
+footer {
+    margin-top: 4rem;
+    text-align: center;
+}
+footer a{
+    color: #292929;
+    text-decoration: none;
+    display: inline;
+    padding: .4rem;
+    margin: .2rem;
+    font-size: 1rem;
+}
