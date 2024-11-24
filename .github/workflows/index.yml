@@ -196,7 +196,12 @@ jobs:
 
           # 处理最后一页
           if [ ! -z "$post_list" ]; then
-            page_file="index${page_index}.html"
+            if [ "$index_0" == "false" ]; then
+              page_file="index.html"
+              index_0=true
+            else
+              page_file="index${page_index}.html"
+            fi
             echo "<!DOCTYPE html>
             <html lang='zh-CN'>
             <head>
