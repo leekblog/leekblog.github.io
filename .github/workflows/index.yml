@@ -105,7 +105,7 @@ jobs:
                 <meta charset='UTF-8'>
                 <title>$post_name | leek</title>
                 <link rel='stylesheet' href='/css/main.css'>
-                <link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>
+                <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
                 <script src='/js/main.js' defer='defer'></script>
                 <meta name='description' content='$description'>
                 <meta name='keywords' content='$keywords'>
@@ -147,7 +147,7 @@ jobs:
                 <meta charset='UTF-8'>
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                 <link rel='stylesheet' href='/css/main.css'>
-                <link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>
+                <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
                 <meta name="description" content="leekblog,leek">
                 <meta name="keywords" content="leekblog,leek,blog">
                 <script src='/js/main.js' defer='defer'></script>
@@ -193,7 +193,7 @@ jobs:
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
             <link rel='stylesheet' href='/css/main.css'>
-            <link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>
+            <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
             <meta name="description" content="leekblog,leek">
             <meta name="keywords" content="leekblog,leek,blog">
             <script src='/js/main.js' defer='defer'></script>
@@ -209,8 +209,8 @@ jobs:
             $post_list
             </main>
             <div class='pagination'>
-            $(if [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>"; fi)
-            $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
+            if [ $page_index -eq 2 ]; then   echo "<a href='index.html'>Prev</a>"; else  echo "<a href='index$((page_index - 1)).html'>Prev</a>";  fi; fi)
+            $(seq 1 $((page_index)) | awk '{if ($1 == 1) print "<a href=\"index.html\">"$1"</a>"; else print "<a href=\"index"$1".html\">"$1"</a>"}')
             $(if [ $((post_count / max_pages)) -ge $page_index ];then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi) 
             </div>
             <footer>
