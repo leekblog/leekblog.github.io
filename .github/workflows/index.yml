@@ -81,15 +81,15 @@ jobs:
                 keywords="leekblog,leek"
               fi
 
-              # 获取目录的创建时间（年和月）
+              # 获取目录的创建时间（年、月、日）
               if [ -d "$dir" ]; then
-                creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +'%Y-%m')
+                creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +'%Y-%m-%d')
                 
                 # 处理可能无法获取创建时间的情况
                 if [ -n "$creation_time" ] && [ "$creation_time" != '-' ]; then
                   year=$(echo "$creation_time" | cut -d'-' -f1)
-                  month=$(echo "$creation_time" | cut -d'-' -f2)
-                  echo "文章日期: 年份=$year, 月份=$month"
+                  month=$(echo "$creation_time" | cut -d'-' -f2,3 | sed 's/-/\//')
+                  echo "文章日期: 年份=$year, 月份和日=$month"
                 else
                   year="----"
                   month="-/-"
