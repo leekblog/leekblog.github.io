@@ -40,19 +40,48 @@ jobs:
           post_count=$(find posts -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "文章数量: $post_count"
 
-          # 遍历每个子目录
+          # 扫描 posts 目录，并收集目录与日期信息
+          posts_with_dates=()
+          for dir in posts/*; do
+            if [ -d "$dir" ]; then
+              # 默认日期为空
+              post_date="1970-01-01"
+
+              # 优先检查目录中的 date 文件
+              date_file="$dir/date"
+              if [ -f "$date_file" ]; then
+                raw_date=$(cat "$date_file" | tr -d '\n') # 去除换行符
+                # 转换 "2002 3/3" 为 "2002-03-03"
+                year=$(echo "$raw_date" | awk '{print $1}')
+                month_day=$(echo "$raw_date" | awk '{print $2}' | tr '/' '-')
+                post_date="$year-$(printf "%02d" $(echo "$month_day" | cut -d'-' -f1))-$(printf "%02d" $(echo "$month_day" | cut -d'-' -f2))"
+              else
+                # 如果没有 date 文件，则使用目录的最后修改时间
+                post_date=$(stat -c '%y' "$dir" | cut -d' ' -f1) # 格式为 YYYY-MM-DD
+              fi
+
+              # 保存目录与日期到数组
+              posts_with_dates+=("$post_date;$dir")
+            fi
+          done
+
+          # 按日期从新到旧排序
+          sorted_posts=$(printf "%s\n" "${posts_with_dates[@]}" | sort -r)
+
+          # 遍历排序后的目录生成 HTML
+          post_list=""
           page_index=1
           items_per_page=19
-          max_pages=20
-          post_list=""
           index_count=0
 
           index_0=false
 
-          for dir in posts/*; do
-            if [ -d "$dir" ]; then
-              # 获取文章名称（目录名）
-              post_name=$(basename "$dir")
+          for post_entry in $sorted_posts; do
+            # 分离日期和目录
+            post_date=$(echo "$post_entry" | cut -d';' -f1)
+            dir=$(echo "$post_entry" | cut -d';' -f2)
+            # 获取文章名称（目录名）
+            post_name=$(basename "$dir")
 
               # 查找目录中的 Markdown 文件
               md_file=$(find "$dir" -name "*.md" | head -n 1)
