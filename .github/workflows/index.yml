@@ -165,8 +165,8 @@ jobs:
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                 <link rel='stylesheet' href='/css/main.css'>
                 <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-                <meta name="description" content="leekblog,leek">
-                <meta name="keywords" content="leekblog,leek,blog">
+                <meta name='description' content='leekblog,leek'>
+                <meta name='keywords' content='leekblog,leek,blog'>
                 <script src='/js/main.js' defer='defer'></script>
                 <title>leek | blog</title>
                 </head>
@@ -197,8 +197,6 @@ jobs:
                 page_index=$((page_index + 1))
               fi
 
-              index_count=$((index_count + 1))
-            fi
           done
 
           # 处理最后一页
@@ -211,8 +209,8 @@ jobs:
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
             <link rel='stylesheet' href='/css/main.css'>
             <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-            <meta name="description" content="leekblog,leek">
-            <meta name="keywords" content="leekblog,leek,blog">
+            <meta name='description' content='leekblog,leek'>
+            <meta name='keywords' content='leekblog,leek,blog'>
             <script src='/js/main.js' defer='defer'></script>
             <title>leek | 第$page_index页</title>
             </head>
