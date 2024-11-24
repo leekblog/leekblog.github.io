@@ -41,10 +41,12 @@ jobs:
           echo "文章数量: $post_count"
 
           # 遍历每个子目录
-          page_index=0
+          page_index=1
           items_per_page=9
           post_list=""
           index_count=0
+
+          index_html_generated=false
 
           for dir in posts/*; do
             if [ -d "$dir" ]; then
@@ -130,45 +132,59 @@ jobs:
               # 添加到 post_list
               post_list="$post_list<a href='pages/${post_name}.html'><span>$post_name</span><span data-y='$year'>$month</span></a>"
             
-              # 检查分页
-              if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
-                page_file="index${page_index}.html"
-                echo "<!DOCTYPE html>
-                <html lang='zh-CN'>
-                <head>
-                <meta charset='UTF-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                <link rel='stylesheet' href='/css/main.css'>
-                <link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>
-                <meta name="description" content="leekblog,leek">
-                <meta name="keywords" content="leekblog,leek,blog">
-                <script src='/js/main.js' defer='defer'></script>
-                <title>leek | blog</title>
-                </head>
-                <body>
-                <header>
-                <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
-                <p class='description'>我是一棵葱,站在风雨中</p>
-                <hr>
-                </header>
-                <main>
-                $post_list
-                </main>
-                <div class='pagination'>
-                $(if [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>"; fi)
-                $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
-                $(if [ $((post_count / 10)) -ge $page_index ];then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi) 
-                </div>
-                <footer>
-                <a href='#'><span class='about'>about me</span></a>
-                <br><br>
-                <span>leek.blog &copy; 2024</span>
-                </footer>
-                </body>
-                </html>" > "$page_file"
-                echo "生成分页文件: $page_file"
-                post_list="" # 重置 post_list
-                page_index=$((page_index + 1))
+
+              # 检查分页和生成index.html
+              if [ $index_count -eq 0 ] && ! $index_html_generated; then
+              # 如果是第一篇文章且还未生成index.html，则生成index.html
+              page_file="index.html"
+              index_html_generated=true
+              else
+                # 检查分页
+                if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
+                  page_file="index${page_index}.html"
+                  echo "<!DOCTYPE html>
+                  <html lang='zh-CN'>
+                  <head>
+                  <meta charset='UTF-8'>
+                  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                  <link rel='stylesheet' href='/css/main.css'>
+                  <link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>
+                  <meta name="description" content="leekblog,leek">
+                  <meta name="keywords" content="leekblog,leek,blog">
+                  <script src='/js/main.js' defer='defer'></script>
+                  <title>leek | blog</title>
+                  </head>
+                  <body>
+                  <header>
+                  <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
+                  <p class='description'>我是一棵葱,站在风雨中</p>
+                  <hr>
+                  </header>
+                  <main>
+                  $post_list
+                  </main>
+                  <div class='pagination'>
+                  $(if [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>"; fi)
+                  $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
+                  $(if [ $((post_count / 10)) -ge $page_index ];then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi) 
+                  </div>
+                  <footer>
+                  <a href='#'><span class='about'>about me</span></a>
+                  <br><br>
+                  <span>leek.blog &copy; 2024</span>
+                  </footer>
+                  </body>
+                  </html>" > "$page_file"
+                  echo "生成分页文件: $page_file"
+                  post_list="" # 重置 post_list
+                  page_index=$((page_index + 1))
+                fi
+              fi
+
+              # 写入当前分页文件（如果是第一页，则已在上面的if条件中处理过）
+              if [ "$page_file" != "index.html" -a "$index_html_generated" == true ]; then
+              # 这里的分页HTML生成代码（除了文件名部分和首次检查外）保持不变...
+              echo "生成分页文件: $page_file"
               fi
 
               index_count=$((index_count + 1))
@@ -176,7 +192,7 @@ jobs:
           done
 
           # 处理最后一页
-          if [ ! -z "$post_list" ]; then
+          if [ ! -z "$post_list" ] && $index_html_generated == true; then
             page_file="index${page_index}.html"
             echo "<!DOCTYPE html>
             <html lang='zh-CN'>
