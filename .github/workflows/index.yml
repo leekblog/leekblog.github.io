@@ -43,8 +43,8 @@ jobs:
 
           # 遍历每个子目录
           page_index=1
-          items_per_page=19
-          max_pages=20
+          items_per_page=9
+          max_pages=10
           post_list=""
           index_count=0
 
