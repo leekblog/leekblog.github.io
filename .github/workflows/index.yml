@@ -41,7 +41,7 @@ jobs:
           post_dirs=$(find posts -mindepth 1 -maxdepth 1 -type d | sort -t '/' -k2)
 
           # 获取子目录数量（文章数量）
-          post_count=$(find post_dirs -mindepth 1 -maxdepth 1 -type d | wc -l)
+          post_count=$(echo "$post_dirs" | wc -l)
           echo "文章数量: $post_count"
 
           # 遍历每个子目录
