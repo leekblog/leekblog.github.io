@@ -6,6 +6,10 @@ on:
       - "posts/**" # 监听 posts 目录下的变化
   workflow_dispatch: # 支持手动触发
 
+# 解决方案
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
