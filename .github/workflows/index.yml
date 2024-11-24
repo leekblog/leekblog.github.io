@@ -162,7 +162,11 @@ jobs:
                 $post_list
                 </main>
                 <div class='pagination'>
-                $(if [ $page_index -eq 2 ]; then echo "<a href='index.html'>Prev</a>"; elif [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>";fi)
+                $(if [ $page_index -eq 3 ]; then \
+                echo "<a href='index.html'>Prev</a>"; \
+                elif [ $page_index -gt 1 ]; then \
+                echo "<a href='index$((page_index - 1)).html'>Prev</a>"; \
+                fi)
                 $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
                 $(if [ $((post_count / 10)) -ge $page_index ];then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi) 
                 </div>
