@@ -81,20 +81,24 @@ jobs:
                 keywords="leekblog,leek"
               fi
 
-              # 获取目录的创建时间（年、月、日）
               if [ -d "$dir" ]; then
-                creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +"%Y %m/%d")
-                
-                # 处理可能无法获取创建时间的情况
+                # 获取目录的创建时间
+                creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +"%Y-%m-%d %H:%M:%S")
+
+                # 检查是否成功获取到创建时间
                 if [ -n "$creation_time" ] && [ "$creation_time" != '-' ]; then
-                  year=$(echo "$creation_time" | cut -d' ' -f1)
-                  month=$(echo "$creation_time" | cut -d' ' -f2)
+                  # 提取日期部分（仅保留年月日）
+                  date_part=$(echo "$creation_time" | awk '{print $1}')
+                  year=$(echo "$date_part" | cut -d'-' -f1)
+                  month=$(echo "$date_part" | cut -d'-' -f2-)
+
                   echo "文章日期: 年份=$year, 月份和日=$month"
                 else
-                  year="----"
-                  month="-/-"
+                  # 创建时间获取失败
                   echo "无法获取 $dir 的创建时间"
                 fi
+              else
+                echo "$dir 不是一个有效的目录"
               fi
 
               # 将 Markdown 转换为 HTML
