@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       # 安装依赖（需要 markdown 转 HTML 的工具，例如 `marked`）
       - name: Install dependencies
