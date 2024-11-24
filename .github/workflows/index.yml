@@ -118,7 +118,6 @@ jobs:
                 <title>$post_name | leek</title>
                 <link rel='stylesheet' href='/css/main.css'>
                 <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-                <script src='/js/main.js' defer='defer'></script>
                 <meta name='description' content='$description'>
                 <meta name='keywords' content='$keywords'>
               </head>
@@ -161,7 +160,6 @@ jobs:
                 <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
                 <meta name="description" content="leekblog,leek">
                 <meta name="keywords" content="leekblog,leek,blog">
-                <script src='/js/main.js' defer='defer'></script>
                 <title>leek | blog</title>
                 </head>
                 <body>
@@ -212,7 +210,6 @@ jobs:
             <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
             <meta name="description" content="leekblog,leek">
             <meta name="keywords" content="leekblog,leek,blog">
-            <script src='/js/main.js' defer='defer'></script>
             <title>leek | 第$page_index页</title>
             </head>
             <body>
