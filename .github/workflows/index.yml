@@ -37,20 +37,8 @@ jobs:
           # 初始化 pages 目录
           mkdir -p pages
 
-          # 获取 posts 目录下所有子目录并按创建时间排序
-          post_dirs=$(find posts -mindepth 1 -maxdepth 1 -type d | while read dir; do
-          # 获取目录的创建时间
-          creation_time=$(stat -c '%W' "$dir")  # %W 表示创建时间（在某些系统上可能是 %w）
-          # 如果无法获取创建时间，则使用修改时间 %Y
-          if [ "$creation_time" -eq 0 ]; then
-            creation_time=$(stat -c '%Y' "$dir")  # %Y 表示修改时间
-          fi
-          # 输出创建时间和目录路径
-          echo "$creation_time $dir"
-          done | sort -n | awk '{print $2}')
-
           # 获取子目录数量（文章数量）
-          post_count=$(find post_dirs -mindepth 1 -maxdepth 1 -type d | wc -l)
+          post_count=$(find posts -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "文章数量: $post_count"
 
           # 遍历每个子目录
@@ -62,7 +50,7 @@ jobs:
 
           index_0=false
 
-          for dir in post_dirs/*; do
+          for dir in posts/*; do
             if [ -d "$dir" ]; then
               # 获取文章名称（目录名）
               post_name=$(basename "$dir")
