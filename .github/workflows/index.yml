@@ -40,16 +40,15 @@ jobs:
           post_count=$(find posts -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "文章数量: $post_count"
 
-          # 遍历每个子目录
-          page_index=1
-          items_per_page=19
-          max_pages=20
-          post_list=""
-          index_count=0
-
-          index_0=false
-
-          for dir in posts/*; do
+          # 获取所有目录的创建时间并按时间排序
+          for dir in $(find posts -mindepth 1 -maxdepth 1 -type d | while read -r dir; do
+            # 获取目录的创建时间
+            creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +"%Y-%m-%d %H:%M:%S")
+            
+            if [ -n "$creation_time" ] && [ "$creation_time" != '-' ]; then
+              echo "$creation_time $dir"
+            fi
+          done | sort -r | cut -d' ' -f2); do
             if [ -d "$dir" ]; then
               # 获取文章名称（目录名）
               post_name=$(basename "$dir")
@@ -82,28 +81,6 @@ jobs:
                 keywords="leekblog,leek"
               fi
 
-              if [ -d "$dir" ]; then
-                # 获取目录的创建时间
-                creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +"%Y-%m-%d %H:%M:%S")
-
-                # 检查是否成功获取到创建时间
-                if [ -n "$creation_time" ] && [ "$creation_time" != '-' ]; then
-                  # 提取日期部分（仅保留年月日）
-                  date_part=$(echo "$creation_time" | awk '{print $1}')
-                  year=$(echo "$date_part" | cut -d'-' -f1)
-                  month=$(echo "$date_part" | cut -d'-' -f2)
-                  day=$(echo "$date_part" | cut -d'-' -f3)
-                  month="$month/$day"
-
-                  echo "文章日期: 年份=$year, 月份和日=$month"
-                else
-                  # 创建时间获取失败
-                  echo "无法获取 $dir 的创建时间"
-                fi
-              else
-                echo "$dir 不是一个有效的目录"
-              fi
-
               # 将 Markdown 转换为 HTML
               post_content=$(cat "$md_file" | npx marked)
 
@@ -126,22 +103,24 @@ jobs:
                 <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
                 <p class='description'>我是一棵葱,站在风雨中</p>
                 <hr>
-                </header>
-                <main>
-                <h1>$post_name</h1><span>$year $month</span>
-                $post_content
-                </main>
-                <footer>
-                <a href='#'><span class='about'>about me</span></a>
-                <br><br>
-                <span>leek.blog &copy; 2024</span>
-                </footer>
+              </header>
+              <main>
+              <h1>$post_name</h1><span>$year $month</span>
+              $post_content
+              </main>
+              <footer>
+              <a href='#'><span class='about'>about me</span></a>
+              <br><br>
+              <span>leek.blog &copy; 2024</span>
+              </footer>
               </body>
               </html>" > "$html_file"
               echo "生成文章 HTML: $html_file"
 
               # 添加到 post_list
               post_list="$post_list<a href='pages/${post_name}.html'><span>$post_name</span><span data-y='$year'>$month</span></a>"
+            fi
+          done
             
               # 检查分页
               if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
