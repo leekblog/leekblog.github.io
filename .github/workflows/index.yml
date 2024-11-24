@@ -6,7 +6,6 @@ on:
       - "posts/**" # 监听 posts 目录下的变化
   workflow_dispatch: # 支持手动触发
 
-# 解决方案
 permissions:
   contents: write
 
@@ -114,7 +113,7 @@ jobs:
                 <hr>
               </header>
               <main>
-              <h1>$post_name</h1><span>$year $month</span>
+              <h1>$post_name</h1>
               $post_content
               </main>
               <footer>
@@ -125,9 +124,8 @@ jobs:
               </body>
               </html>" > "$html_file"
               echo "生成文章 HTML: $html_file"
-
               # 添加到 post_list
-              post_list="$post_list<a href='pages/${post_name}.html'><span>$post_name</span><span data-y='$year'>$month</span></a>"
+              post_list="$post_list<a href='pages/${post_name}.html'><span>$post_name</span></a>"
               
               # 检查分页
               if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
@@ -144,9 +142,6 @@ jobs:
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                 <link rel='stylesheet' href='/css/main.css'>
                 <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-                <meta name="description" content="leekblog,leek">
-                <meta name="keywords" content="leekblog,leek,blog">
-                <script src='/js/main.js' defer='defer'></script>
                 <title>leek | blog</title>
                 </head>
                 <body>
@@ -158,12 +153,6 @@ jobs:
                 <main>
                 $post_list
                 </main>
-                <div class='pagination'>
-                $(if [ $page_index -gt 1 ]; then 
-                if [ $page_index -eq 2 ]; then   echo "<a href='index.html'>Prev</a>"; else  echo "<a href='index$((page_index - 1)).html'>Prev</a>";  fi; fi)
-                $(seq 1 $((page_index)) | awk '{if ($1 == 1) print "<a href=\"index.html\">"$1"</a>"; else print "<a href=\"index"$1".html\">"$1"</a>"}')
-                $(if [ $((post_count / max_pages)) -ge $page_index ];then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi) 
-                </div>
                 <footer>
                 <a href='#'><span class='about'>about me</span></a>
                 <br><br>
@@ -181,7 +170,7 @@ jobs:
           done
 
           # 处理最后一页
-          if [ ! -z "$post_list" ]; then
+          if [ -n "$post_list" ]; then
             page_file="index${page_index}.html"
             echo "<!DOCTYPE html>
             <html lang='zh-CN'>
@@ -190,10 +179,7 @@ jobs:
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
             <link rel='stylesheet' href='/css/main.css'>
             <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-            <meta name="description" content="leekblog,leek">
-            <meta name="keywords" content="leekblog,leek,blog">
-            <script src='/js/main.js' defer='defer'></script>
-            <title>leek | 第$page_index页</title>
+            <title>leek | blog</title>
             </head>
             <body>
             <header>
@@ -204,12 +190,6 @@ jobs:
             <main>
             $post_list
             </main>
-            <div class='pagination'>
-            $(if [ $page_index -gt 1 ]; then 
-            if [ $page_index -eq 2 ]; then   echo "<a href='index.html'>Prev</a>"; else  echo "<a href='index$((page_index - 1)).html'>Prev</a>";  fi; fi)
-            $(seq 1 $((page_index)) | awk '{if ($1 == 1) print "<a href=\"index.html\">"$1"</a>"; else print "<a href=\"index"$1".html\">"$1"</a>"}')
-            $(if [ $((post_count / max_pages)) -ge $page_index ];then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi) 
-            </div>
             <footer>
             <a href='#'><span class='about'>about me</span></a>
             <br><br>
@@ -217,7 +197,7 @@ jobs:
             </footer>
             </body>
             </html>" > "$page_file"
-            echo "生成分页文件: $page_file"
+            echo "生成最后一页分页文件: $page_file"
           fi
 
       # 提交生成的 HTML 文件
@@ -225,8 +205,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pages/*.html index*.html
-          git commit -m "Update pages and index files with description and keywords"
+          git add pages/*.html index*.html || true
+          git commit -m "Update pages and index files with description and keywords" || true
           git push
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
