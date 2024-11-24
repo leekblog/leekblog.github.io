@@ -83,12 +83,13 @@ jobs:
 
               # 获取目录的创建时间（年、月、日）
               if [ -d "$dir" ]; then
-                creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +"%Y %m/%d")
+                # 提取日期和时间部分，忽略多余内容
+                creation_time=$(stat -c '%w' "$dir" | awk '{print $1, $2}')
                 
-                # 处理可能无法获取创建时间的情况
+                # 检查是否成功获取创建时间
                 if [ -n "$creation_time" ] && [ "$creation_time" != '-' ]; then
                   year=$(echo "$creation_time" | cut -d' ' -f1)
-                  month=$(echo "$creation_time" | cut -d' ' -f2)
+                  month=$(echo "$creation_time" | cut -d' ' -f2 | awk -F'[-:]' '{print $1"/"$2}')
                   echo "文章日期: 年份=$year, 月份和日=$month"
                 else
                   year="----"
