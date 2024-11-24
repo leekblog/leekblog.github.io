@@ -66,8 +66,9 @@ jobs:
               if [ -f "$description_file" ]; then
                 description=$(cat "$description_file" | tr '\n' ' ')
               else
-                # 如果 description 文件不存在，提取 Markdown 前 3 行
-                description=$(head -n 3 "$md_file" | tr '\n' ' ')
+                # 如果 description 文件不存在，提取 Markdown 前 1 行
+                description=$(head -n 1 "$md_file" | tr '\n' ' ')
+                description=$(cat "$description" | npx marked)
               fi
               if [ -z "$description" ]; then
                 description="This is a blog post on $post_name."
@@ -128,7 +129,6 @@ jobs:
                 </header>
                 <main>
                 <h1>$post_name</h1><span>$year $month</span>
-                <p>$description</p>
                 $post_content
                 </main>
                 <footer>
