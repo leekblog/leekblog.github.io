@@ -90,7 +90,9 @@ jobs:
                   # 提取日期部分（仅保留年月日）
                   date_part=$(echo "$creation_time" | awk '{print $1}')
                   year=$(echo "$date_part" | cut -d'-' -f1)
-                  month=$(echo "$date_part" | cut -d'-' -f2-)
+                  month=$(echo "$date_part" | cut -d'-' -f2)
+                  day=$(echo "$date_part" | cut -d'-' -f3)
+                  month="$month/$day"
 
                   echo "文章日期: 年份=$year, 月份和日=$month"
                 else
