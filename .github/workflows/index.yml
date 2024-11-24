@@ -49,14 +49,7 @@ jobs:
 
           index_0=false
 
-          # 获取所有目录的创建时间并排序
-            for dir in $(find posts -mindepth 1 -maxdepth 1 -type d | while read -r dir; do
-              # 获取目录的创建时间
-              creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +"%Y-%m-%d %H:%M:%S")
-              if [ -n "$creation_time" ] && [ "$creation_time" != '-' ]; then
-                echo "$creation_time $dir"
-              fi
-            done | sort | cut -d' ' -f2); do
+          for dir in posts/*; do
             if [ -d "$dir" ]; then
               # 获取文章名称（目录名）
               post_name=$(basename "$dir")
@@ -165,8 +158,8 @@ jobs:
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                 <link rel='stylesheet' href='/css/main.css'>
                 <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-                <meta name='description' content='leekblog,leek'>
-                <meta name='keywords' content='leekblog,leek,blog'>
+                <meta name="description" content="leekblog,leek">
+                <meta name="keywords" content="leekblog,leek,blog">
                 <script src='/js/main.js' defer='defer'></script>
                 <title>leek | blog</title>
                 </head>
@@ -197,6 +190,8 @@ jobs:
                 page_index=$((page_index + 1))
               fi
 
+              index_count=$((index_count + 1))
+            fi
           done
 
           # 处理最后一页
@@ -209,8 +204,8 @@ jobs:
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
             <link rel='stylesheet' href='/css/main.css'>
             <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-            <meta name='description' content='leekblog,leek'>
-            <meta name='keywords' content='leekblog,leek,blog'>
+            <meta name="description" content="leekblog,leek">
+            <meta name="keywords" content="leekblog,leek,blog">
             <script src='/js/main.js' defer='defer'></script>
             <title>leek | 第$page_index页</title>
             </head>
