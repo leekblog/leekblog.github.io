@@ -81,17 +81,20 @@ jobs:
                 keywords="leekblog,leek"
               fi
 
-              # 解析日期文件（如果存在）
-              date_file="$dir/date"
-              if [ -f "$date_file" ]; then
-                date_content=$(cat "$date_file" | tr -d '\n')
-                year=$(echo "$date_content" | cut -d' ' -f1)
-                month=$(echo "$date_content" | cut -d' ' -f2)
-                echo "文章日期: 年份=$year, 月份=$month"
-              else
-                year="----"
-                month="-/-"
-                echo "目录 $dir 中没有 date 文件"
+              # 获取目录的创建时间（年和月）
+              if [ -d "$dir" ]; then
+                creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +'%Y-%m')
+                
+                # 处理可能无法获取创建时间的情况
+                if [ -n "$creation_time" ] && [ "$creation_time" != '-' ]; then
+                  year=$(echo "$creation_time" | cut -d'-' -f1)
+                  month=$(echo "$creation_time" | cut -d'-' -f2)
+                  echo "文章日期: 年份=$year, 月份=$month"
+                else
+                  year="----"
+                  month="-/-"
+                  echo "无法获取 $dir 的创建时间"
+                fi
               fi
 
               # 将 Markdown 转换为 HTML
