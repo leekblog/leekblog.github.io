@@ -41,7 +41,7 @@ jobs:
           echo "文章数量: $post_count"
 
           # 遍历每个子目录
-          page_index=0
+          page_index=1
           items_per_page=9
           post_list=""
           index_count=0
@@ -132,7 +132,7 @@ jobs:
             
               # 检查分页
               if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
-                page_file="index${page_index}.html"
+                page_file="index.html"
                 echo "<!DOCTYPE html>
                 <html lang='zh-CN'>
                 <head>
