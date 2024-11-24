@@ -164,7 +164,7 @@ jobs:
                 <div class='pagination'>
                 $(if [ $page_index -gt 1 ]; then 
                 if [ $page_index -eq 2 ]; then   echo "<a href='index.html'>Prev</a>"; else  echo "<a href='index$((page_index - 1)).html'>Prev</a>";  fi; fi)
-                $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
+                (seq 1 $((page_index)) | awk '{if ($1 == 1) print ""; else print "<a href=\"index"$1".html\">"$1"</a>"}')
                 $(if [ $((post_count / 10)) -ge $page_index ];then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi) 
                 </div>
                 <footer>
