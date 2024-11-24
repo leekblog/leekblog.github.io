@@ -46,6 +46,8 @@ jobs:
           post_list=""
           index_count=0
 
+          index_0=false
+
           for dir in posts/*; do
             if [ -d "$dir" ]; then
               # 获取文章名称（目录名）
@@ -132,7 +134,12 @@ jobs:
             
               # 检查分页
               if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
-                page_file="index.html"
+                if [ "$index_0" == "false" ]; then
+                  page_file="index.html"
+                  index_0=true
+                else
+                  page_file="index${page_index}.html"
+                fi
                 echo "<!DOCTYPE html>
                 <html lang='zh-CN'>
                 <head>
