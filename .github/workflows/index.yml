@@ -156,7 +156,7 @@ jobs:
                 </main>
                 <div class='pagination'>
                 $(if [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>"; fi)
-                $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
+                # $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
                 <a href='index$((page_index + 1)).html'>Next</a>
                 </div>
                 <footer>
@@ -201,7 +201,7 @@ jobs:
             </main>
             <div class='pagination'>
             $(if [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>"; fi)
-            $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
+            # $(seq 1 $((page_index)) | awk '{print "<a href=\"index"$1".html\">"$1"</a>"}')
             <a href='index$((page_index + 1)).html'>Next</a>
             </div>
             <footer>
