@@ -40,6 +40,15 @@ jobs:
           post_count=$(find posts -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "文章数量: $post_count"
 
+          # 遍历每个子目录
+          page_index=1
+          items_per_page=19
+          max_pages=20
+          post_list=""
+          index_count=0
+
+          index_0=false
+
           # 获取所有目录的创建时间并按时间排序
           for dir in $(find posts -mindepth 1 -maxdepth 1 -type d | while read -r dir; do
             # 获取目录的创建时间
@@ -120,8 +129,7 @@ jobs:
               # 添加到 post_list
               post_list="$post_list<a href='pages/${post_name}.html'><span>$post_name</span><span data-y='$year'>$month</span></a>"
             fi
-          done
-            
+          done            
               # 检查分页
               if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
                 if [ "$index_0" == "false" ]; then
