@@ -15,17 +15,12 @@ jobs:
 
       - name: Get last commit time of files in subdirectories in the posts folder
         run: |
-          # 查找 posts 目录下的所有子目录
-          find posts -mindepth 1 -maxdepth 1 -type d | while read dir; do
-            # 获取子目录中所有文件的最后提交时间
-            last_commit_time=$(git log -1 --format=%ct -- "$dir"/*)
-            
-            # 如果没有提交记录
-            if [ -z "$last_commit_time" ]; then
-              echo "No commit found for files in directory: $dir"
-            else
-              # 获取最后提交文件的提交时间
-              last_commit_time=$(git log -1 --format=%ct -- "$dir"/*)
-              echo "$(basename "$dir")_$(date -d @$last_commit_time)"
-            fi
+        
+          # 获取 git 仓库中所有文件的最新修改时间
+          $git ls-tree -r --name-only HEAD | while read filename; do
+          echo "$(git log -1 --pretty=format:"%ad" -- $filename) $filename";
+          done
+          # 获取 git 仓库中所有文件的最初创建时间
+          $git ls-tree -r --name-only HEAD | while read filename; do
+          echo "$(git log --pretty=format:"%ad" -- $filename | tail -1) $filename";
           done
