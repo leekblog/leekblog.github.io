@@ -1,74 +1,109 @@
-name: Blog Workflow
+name: Blog Post Management
 
 on:
   push:
     paths:
       - 'posts/**'
-      - '.github/workflows/index.yml'
+      - 'index.yml'
 
 jobs:
-  update_blog:
+  blog-management:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up environment
-      run: |
-        if [ ! -d "pages" ]; then
-          mkdir pages
-          echo 0 > pages/num
-        fi
-        
-        TOTAL_ARTICLES=$(find pages -mindepth 1 -maxdepth 1 -type d | wc -l)
-        NUM_ARTICLES=$(cat pages/num)
+      - name: Set up Node.js (for markdown conversion)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-        OPERATION="no_change"
-        HEADER="<html><head><title>Blog</title></head><body>"
-        FOOTER="</body></html>"
-
-        if [ "$TOTAL_ARTICLES" -gt "$NUM_ARTICLES" ]; then
-          OPERATION="write"
-        elif [ "$TOTAL_ARTICLES" -lt "$NUM_ARTICLES" ]; then
-          OPERATION="delete"
-        fi
-
-        echo "Operation: $OPERATION"
-
-    - name: Handle Delete Operation
-      if: ${{ steps.set_env.outputs.operation == 'delete' }}
-      run: |
-        echo "Starting delete operation"
-
-        # Loop through all files in pages directory
-        for page in pages/*.html; do
-          ARTICLE_NAME=$(basename "$page" .html)
-          
-          # Check if the article directory exists in posts
-          if [ ! -d "posts/$ARTICLE_NAME" ]; then
-            echo "Deleting article: $ARTICLE_NAME"
-            
-            # Delete the article HTML file from pages
-            rm -f "pages/$ARTICLE_NAME.html"
-            
-            # Also remove the article entry from index.html
-            sed -i "/$ARTICLE_NAME.html/d" pages/index.html
-          else
-            echo "Article $ARTICLE_NAME still exists in posts, skipping deletion."
+      - name: Create pages directory if it doesn't exist
+        run: |
+          if [ ! -d "pages" ]; then
+            mkdir pages
+            echo "0" > pages/num
           fi
-        done
 
-        # Optionally, remove index4.html if pagination is no longer needed
-        if [ -f "pages/index4.html" ]; then
-          echo "Deleting index4.html"
-          rm -f "pages/index4.html"
-        fi
+      - name: Get total number of posts
+        run: |
+          total_posts=$(find posts -type d | wc -l)
+          echo "total_posts=$total_posts" >> $GITHUB_ENV
+          
+      - name: Set operation variable
+        run: |
+          current_num=$(cat pages/num)
+          if [ "$total_posts" -gt "$current_num" ]; then
+            echo "operation=add" >> $GITHUB_ENV
+          elif [ "$total_posts" -lt "$current_num" ]; then
+            echo "operation=delete" >> $GITHUB_ENV
+          else
+            echo "operation=unchanged" >> $GITHUB_ENV
+          fi
 
-    - name: Commit Changes
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add .
-        git commit -m "Update blog articles"
-        git push
+      - name: Generate HTML pages for new posts
+        if: env.operation == 'add'
+        run: |
+          for post_dir in posts/*; do
+            post_name=$(basename "$post_dir")
+            if [ ! -f "pages/$post_name.html" ]; then
+              # Get the post details (title, content, etc.)
+              title=$(basename "$post_dir")
+              content=$(cat "$post_dir/*.md" | markdown)
+              seo_desc=$(cat "$post_dir/desc" || head -n 1 "$post_dir/*.md")
+              seo_keywords=$(cat "$post_dir/key" || echo "blog,keelblog,keel")
+              year_month=$(cat "$post_dir/date" || echo "---- --/--")
+              year=$(echo "$year_month" | awk '{print $1}')
+              month=$(echo "$year_month" | awk '{print $2}')
+              
+              # Create HTML content
+              echo "<html><head><meta name='description' content='$seo_desc'><meta name='keywords' content='$seo_keywords'></head><body>" > "pages/$post_name.html"
+              echo "<header>$title</header>" >> "pages/$post_name.html"
+              echo "<p>$content</p>" >> "pages/$post_name.html"
+              echo "</body></html>" >> "pages/$post_name.html"
+            fi
+          done
+
+      - name: Update index.html
+        run: |
+          html_header="<html><head><title>My Blog</title></head><body>"
+          html_footer="</body></html>"
+          
+          # Generate article list
+          article_list=""
+          for post in $(find pages -type f -name "*.html" | sort); do
+            title=$(basename "$post" .html)
+            article_list="<a href='/pages/$title.html'><span>$title</span></a>" >> $article_list
+          done
+
+          # Write to index.html
+          if [ ! -f "index.html" ]; then
+            echo "$html_header" > index.html
+            echo "$article_list" >> index.html
+            echo "$html_footer" >> index.html
+          else
+            # Add pagination logic if there are more than 10 articles
+            # Recursively check if index2.html, index3.html exist, etc.
+            current_page=1
+            while [ -f "index$current_page.html" ]; do
+              current_page=$((current_page+1))
+            done
+            index_file="index$current_page.html"
+            echo "$html_header" > $index_file
+            echo "$article_list" >> $index_file
+            echo "$html_footer" >> $index_file
+          fi
+
+      - name: Handle post deletion
+        if: env.operation == 'delete'
+        run: |
+          for post_dir in posts/*; do
+            post_name=$(basename "$post_dir")
+            if [ -f "pages/$post_name.html" ]; then
+              rm "pages/$post_name.html"
+            fi
+          done
+
+      - name: Update num file
+        run: |
+          echo "$total_posts" > pages/num
