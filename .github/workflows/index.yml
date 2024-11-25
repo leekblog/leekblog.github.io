@@ -17,11 +17,13 @@ jobs:
         run: |
 
           # 获取 git 仓库中所有文件的最新修改时间
-          filename="posts"
-          $git ls-tree -r --name-only HEAD | while read filename; do
-          echo "$(git log -1 --pretty=format:"%ad" -- $filename) $filename";
+          git ls-tree -r --name-only HEAD | while read filename; do
+            last_commit_time=$(git log -1 --pretty=format:"%ad" -- "$filename")
+            echo "$last_commit_time $filename"
           done
-          # 获取 git 仓库中所有文件的最初创建时间
-          $git ls-tree -r --name-only HEAD | while read filename; do
-          echo "$(git log --pretty=format:"%ad" -- $filename | tail -1) $filename";
+
+          # 获取 git 仓库中所有文件的最初提交时间
+          git ls-tree -r --name-only HEAD | while read filename; do
+            first_commit_time=$(git log --reverse --pretty=format:"%ad" -- "$filename" | head -1)
+            echo "$first_commit_time $filename"
           done
