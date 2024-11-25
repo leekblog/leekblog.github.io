@@ -128,7 +128,7 @@ jobs:
                 <hr>
                 </header>
                 <main>
-                <h1>$post_name</h1><span>$year $month</span>
+                <!--<h1>$post_name</h1><span>$year $month</span>-->
                 $post_content
                 </main>
                 <footer>
