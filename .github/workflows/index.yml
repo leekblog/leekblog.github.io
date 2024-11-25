@@ -44,6 +44,10 @@ jobs:
               # 获取对应 HTML 文件的最后提交时间
               page_file="pages/${post_name}.html"
               last_commit_date=$(git log -1 --format="%ct" "$page_file" 2>/dev/null)
+              
+              # 调试输出
+              echo "Dir: $dir | Last Commit Date: $last_commit_date"
+              
               if [ -z "$last_commit_date" ]; then
                 # 如果没有提交记录，则默认使用一个很早的时间
                 last_commit_date=0
