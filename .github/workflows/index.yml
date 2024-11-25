@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: npm install marked
 
-      # 生成 HTML 和分页索引
+      # 生成 HTML 和 index 文件
       - name: Generate HTML and index files
         run: |
           mkdir -p pages
@@ -37,9 +37,14 @@ jobs:
           post_count=$(find posts -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "文章数量: $post_count"
 
-          # 按目录创建时间排序
-          sorted_dirs=$(find posts -mindepth 1 -maxdepth 1 -type d -exec stat -c '%Y %n' {} \; | sort -n | awk '{print $2}')
-          
+          # 根据 Git 提交日期排序目录
+          sorted_dirs=$(for dir in posts/*; do
+            if [ -d "$dir" ]; then
+              last_commit_date=$(git log -1 --format="%ct" "$dir")
+              echo "$last_commit_date $dir"
+            fi
+          done | sort -n | awk '{print $2}')
+
           # 遍历每个目录生成 HTML
           post_list=""
           page_index=1
