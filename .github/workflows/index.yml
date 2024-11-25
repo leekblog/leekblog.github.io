@@ -33,7 +33,7 @@ jobs:
       - name: Generate HTML and index files
         run: |
           mkdir -p pages
-          items_per_page=19
+          items_per_page=9
           post_count=$(find posts -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "文章数量: $post_count"
 
