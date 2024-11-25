@@ -52,6 +52,10 @@ jobs:
             fi
           done | sort -n | awk '{print $2}')
 
+          # 调试输出排序结果
+          echo "排序后的目录："
+          echo "$sorted_dirs"
+
           # 遍历每个目录生成 HTML
           post_list=""
           page_index=1
