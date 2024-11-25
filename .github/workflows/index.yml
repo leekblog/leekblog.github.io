@@ -1,109 +1,128 @@
-name: Blog Post Management
-
+name: Build Pages
+ 
 on:
   push:
     paths:
       - 'posts/**'
       - 'index.yml'
-
+ 
 jobs:
-  blog-management:
+  build_pages:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up Node.js (for markdown conversion)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+    - name: Set up environment
+      run: |
+        if [ ! -d "pages" ]; then
+          mkdir pages
+          echo "0" > pages/num
+        fi
 
-      - name: Create pages directory if it doesn't exist
-        run: |
-          if [ ! -d "pages" ]; then
-            mkdir pages
-            echo "0" > pages/num
-          fi
+    - name: Calculate total post count
+      id: total_posts
+      run: |
+        POST_COUNT=$(ls -1 pages | wc -l)
+        echo "::set-output name=count::$POST_COUNT"
+ 
+    - name: Initialize variables
+      run: |
+        echo "OPERATION_VAR='unchanged'" >> $GITHUB_ENV
+        echo "HEADER_VAR='<header>...</header>'" >> $GITHUB_ENV
+        echo "FOOTER_VAR='<footer>...</footer>'" >> $GITHUB_ENV
+    - name: Compare post count and set operation
+      run: |
+        NUM=$(cat pages/num)
+        POST_COUNT=${{ steps.total_posts.outputs.count }}
+  
+        if [ "$POST_COUNT" -gt "$NUM" ]; then
+          echo "OPERATION_VAR='write'" >> $GITHUB_ENV
+        elif [ "$POST_COUNT" -lt "$NUM" ]; then
+          echo "OPERATION_VAR='delete'" >> $GITHUB_ENV
+        fi
 
-      - name: Get total number of posts
-        run: |
-          total_posts=$(find posts -type d | wc -l)
-          echo "total_posts=$total_posts" >> $GITHUB_ENV
-          
-      - name: Set operation variable
-        run: |
-          current_num=$(cat pages/num)
-          if [ "$total_posts" -gt "$current_num" ]; then
-            echo "operation=add" >> $GITHUB_ENV
-          elif [ "$total_posts" -lt "$current_num" ]; then
-            echo "operation=delete" >> $GITHUB_ENV
-          else
-            echo "operation=unchanged" >> $GITHUB_ENV
-          fi
-
-      - name: Generate HTML pages for new posts
-        if: env.operation == 'add'
-        run: |
-          for post_dir in posts/*; do
-            post_name=$(basename "$post_dir")
-            if [ ! -f "pages/$post_name.html" ]; then
-              # Get the post details (title, content, etc.)
-              title=$(basename "$post_dir")
-              content=$(cat "$post_dir/*.md" | markdown)
-              seo_desc=$(cat "$post_dir/desc" || head -n 1 "$post_dir/*.md")
-              seo_keywords=$(cat "$post_dir/key" || echo "blog,keelblog,keel")
-              year_month=$(cat "$post_dir/date" || echo "---- --/--")
-              year=$(echo "$year_month" | awk '{print $1}')
-              month=$(echo "$year_month" | awk '{print $2}')
-              
-              # Create HTML content
-              echo "<html><head><meta name='description' content='$seo_desc'><meta name='keywords' content='$seo_keywords'></head><body>" > "pages/$post_name.html"
-              echo "<header>$title</header>" >> "pages/$post_name.html"
-              echo "<p>$content</p>" >> "pages/$post_name.html"
-              echo "</body></html>" >> "pages/$post_name.html"
+    - name: Process write operation
+      if: env.OPERATION_VAR == 'write'
+      run: |
+        for POST_DIR in posts/*/; do
+          EXIT_FLAG=false
+          for PAGE_FILE in pages/*; do
+            if [ "$(basename "$POST_DIR")" == "$(basename "$PAGE_FILE")" ]; then
+              EXIT_FLAG=true
+              break
             fi
           done
 
-      - name: Update index.html
-        run: |
-          html_header="<html><head><title>My Blog</title></head><body>"
-          html_footer="</body></html>"
-          
-          # Generate article list
-          article_list=""
-          for post in $(find pages -type f -name "*.html" | sort); do
-            title=$(basename "$post" .html)
-            article_list="<a href='/pages/$title.html'><span>$title</span></a>" >> $article_list
-          done
+          if [ "$EXIT_FLAG" == false ]; then
+            POST_TITLE=$(basename "$POST_DIR")
+            POST_CONTENT=$(cat "$POST_DIR"/*.md | pandoc -f markdown -t html)
+            SEO_DESC=$(cat "$POST_DIR"/desc 2>/dev/null || head -n 1 "$POST_DIR"/*.md)
+            SEO_KEYS=$(cat "$POST_DIR"/key 2>/dev/null || echo "blog,keelblog,keel")
+            DATE_RAW=$(cat "$POST_DIR"/date 2>/dev/null || echo "---- --/--")
+            IFS=' ' read -r YEAR MONTH <<< "$DATE_RAW"
 
-          # Write to index.html
-          if [ ! -f "index.html" ]; then
-            echo "$html_header" > index.html
-            echo "$article_list" >> index.html
-            echo "$html_footer" >> index.html
-          else
-            # Add pagination logic if there are more than 10 articles
-            # Recursively check if index2.html, index3.html exist, etc.
-            current_page=1
-            while [ -f "index$current_page.html" ]; do
-              current_page=$((current_page+1))
-            done
-            index_file="index$current_page.html"
-            echo "$html_header" > $index_file
-            echo "$article_list" >> $index_file
-            echo "$html_footer" >> $index_file
+            echo "<html><head><meta name='keywords' content='$SEO_KEYS'><meta name='description' content='$SEO_DESC'></head><body>${{ env.HEADER_VAR }}$POST_CONTENT${{ env.FOOTER_VAR }}</body></html>" > "pages/$POST_TITLE.html"
           fi
+        done
 
-      - name: Handle post deletion
-        if: env.operation == 'delete'
-        run: |
-          for post_dir in posts/*; do
-            post_name=$(basename "$post_dir")
-            if [ -f "pages/$post_name.html" ]; then
-              rm "pages/$post_name.html"
+
+    - name: Update num file and generate index
+      run: |
+        NUM=$(cat pages/num)
+        POST_COUNT=${{ steps.total_posts.outputs.count }}
+        echo "$POST_COUNT" > pages/num
+
+        ARTICLE_LIST=""
+        for PAGE_FILE in pages/*.html; do
+          ARTICLE_TITLE=$(basename "$PAGE_FILE" .html)
+          YEAR_MONTH=$(grep -oP '(?<=\$year=)\d{4} (?<=\$month=)\d{1,2}/\d{1,2}' "$PAGE_FILE" || echo "---- --/--")
+          ARTICLE_LIST+="<a href='/pages/$ARTICLE_TITLE.html'><span>$ARTICLE_TITLE</span><span data-t='$YEAR_MONTH'></span><br/>"
+        done
+
+        if [ ! -f "pages/index.html" ]; then
+          echo "<html><head></head><body>${{ env.HEADER_VAR }}$ARTICLE_LIST${{ env.FOOTER_VAR }}</body></html>" > pages/index.html
+
+          if [ "$POST_COUNT" -gt 10 ]; then
+            sed -i 's|</body>|<a href="/pages/index2.html">Next Page</a></body>|' pages/index.html
+          fi
+        else
+          # This section is too long, continue in the next part
+
+          # (续)
+          TEMP_VAR=""
+          INDEX_FILE="pages/index.html"
+          PAGE_NUM=2
+
+          while [ -f "$INDEX_FILE" ]; do
+            if [ "$TEMP_VAR" == "" ]; then
+              TEMP_VAR=$(tail -n +2 "$INDEX_FILE" | head -n -1)
+            fi
+
+            ARTICLE_LIST=$(head -n 10 "$INDEX_FILE" | tail -n +2)
+            if [ "$(echo "$ARTICLE_LIST" | wc -l)" -lt 10 ]; then
+              sed -i '1s|^|<a href="/pages/index'$((PAGE_NUM-1)).html">Previous Page</a> |' "$INDEX_FILE"
+            fi
+
+            sed -i "s|$TEMP_VAR||" "$INDEX_FILE"
+            sed -i 's|</body>|<a href="/pages/index'$((PAGE_NUM+1)).html">Next Page</a></body>|' "$INDEX_FILE"
+
+            if [ -f "pages/index$PAGE_NUM.html" ]; then
+              INDEX_FILE="pages/index$PAGE_NUM.html"
+              ARTICLE_LIST="$TEMP_VAR"
+              TEMP_VAR=""
+              PAGE_NUM=$((PAGE_NUM + 1))
+            else
+              echo "<html><head></head><body>${{ env.HEADER_VAR }}$ARTICLE_LIST${{ env.FOOTER_VAR }}</body></html>" > "pages/index$PAGE_NUM.html"
+              break
             fi
           done
+        fi
 
-      - name: Update num file
-        run: |
-          echo "$total_posts" > pages/num
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add pages/
+        git commit -m "Automated pages update" || true
+        git push
