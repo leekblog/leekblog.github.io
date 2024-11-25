@@ -16,22 +16,18 @@ jobs:
 
     - name: Set up environment
       run: |
-        # Create pages directory if not exists
         if [ ! -d "pages" ]; then
           mkdir pages
           echo 0 > pages/num
         fi
         
-        # Get total number of articles in the pages directory
         TOTAL_ARTICLES=$(find pages -mindepth 1 -maxdepth 1 -type d | wc -l)
         NUM_ARTICLES=$(cat pages/num)
 
-        # Initialize operation variable and page parts
         OPERATION="no_change"
         HEADER="<html><head><title>Blog</title></head><body>"
         FOOTER="</body></html>"
 
-        # Determine operation (write, delete, or no change)
         if [ "$TOTAL_ARTICLES" -gt "$NUM_ARTICLES" ]; then
           OPERATION="write"
         elif [ "$TOTAL_ARTICLES" -lt "$NUM_ARTICLES" ]; then
@@ -40,99 +36,33 @@ jobs:
 
         echo "Operation: $OPERATION"
 
-    - name: Handle Write Operation
-      if: ${{ steps.set_env.outputs.operation == 'write' }}
-      run: |
-        # Loop through all subdirectories in posts
-        for dir in posts/*/; do
-          ARTICLE_NAME=$(basename "$dir")
-          
-          # Check if the article already exists in pages
-          EXIT_FLAG=false
-          for file in pages/*; do
-            if [[ $(basename "$file") == "$ARTICLE_NAME.html" ]]; then
-              EXIT_FLAG=true
-              break
-            fi
-          done
-
-          if [ "$EXIT_FLAG" == true ]; then
-            echo "Article $ARTICLE_NAME already exists, skipping."
-            continue
-          fi
-
-          # Get article details (title, content, SEO, etc.)
-          TITLE=$(basename "$dir")
-          CONTENT=$(cat "$dir"/*.md)
-          HTML_CONTENT=$(echo "$CONTENT" | pandoc -f markdown -t html)
-          SEO_DESC=$(cat "$dir/d" || echo "$(echo "$CONTENT" | head -n 1)")
-          SEO_KEYWORDS=$(cat "$dir/k" || echo "blog,keelblog,keel")
-          YEAR_MONTH=$(cat "$dir/t")
-          YEAR=$(echo "$YEAR_MONTH" | awk '{print $1}')
-          MONTH=$(echo "$YEAR_MONTH" | awk '{print $2}')
-          
-          # Create the HTML file for the article
-          cat > "pages/$TITLE.html" <<EOL
-          <html>
-          <head>
-            <meta name="description" content="$SEO_DESC">
-            <meta name="keywords" content="$SEO_KEYWORDS">
-          </head>
-          <body>
-            $HEADER
-            <h1>$TITLE</h1>
-            $HTML_CONTENT
-            $FOOTER
-          </body>
-          </html>
-          EOL
-
-          # Update article list in index.html
-          ARTICLE_LIST="<a href='/pages/$TITLE.html'><span>$TITLE</span><span data-t='$YEAR'>$MONTH</span></a>"
-          echo "$ARTICLE_LIST" >> pages/index.html
-        done
-
     - name: Handle Delete Operation
       if: ${{ steps.set_env.outputs.operation == 'delete' }}
       run: |
-        # Loop through all files in pages and delete articles not present in posts
-        for file in pages/*; do
-          ARTICLE_NAME=$(basename "$file" .html)
+        echo "Starting delete operation"
+
+        # Loop through all files in pages directory
+        for page in pages/*.html; do
+          ARTICLE_NAME=$(basename "$page" .html)
           
-          # Check if the article exists in posts
+          # Check if the article directory exists in posts
           if [ ! -d "posts/$ARTICLE_NAME" ]; then
-            echo "Deleting article $ARTICLE_NAME"
+            echo "Deleting article: $ARTICLE_NAME"
+            
+            # Delete the article HTML file from pages
             rm -f "pages/$ARTICLE_NAME.html"
+            
+            # Also remove the article entry from index.html
+            sed -i "/$ARTICLE_NAME.html/d" pages/index.html
+          else
+            echo "Article $ARTICLE_NAME still exists in posts, skipping deletion."
           fi
         done
 
-    - name: Handle Index File
-      run: |
-        # Create or update index.html
-        if [ ! -f "pages/index.html" ]; then
-          cat > pages/index.html <<EOL
-            <html>
-            <head>
-              <title>Blog Index</title>
-            </head>
-            <body>
-              $HEADER
-              <!-- List of articles will be inserted here -->
-              $FOOTER
-            </body>
-            </html>
-            EOL
-        fi
-
-        # Add article links to index.html
-        for ARTICLE in $(cat pages/index.html); do
-          echo "$ARTICLE" >> pages/index.html
-        done
-
-        # Check if pagination is required
-        ARTICLE_COUNT=$(grep -o '<a ' pages/index.html | wc -l)
-        if [ "$ARTICLE_COUNT" -gt 10 ]; then
-          echo "<a href='/pages/index2.html'>Next Page</a>" >> pages/index.html
+        # Optionally, remove index4.html if pagination is no longer needed
+        if [ -f "pages/index4.html" ]; then
+          echo "Deleting index4.html"
+          rm -f "pages/index4.html"
         fi
 
     - name: Commit Changes
