@@ -33,11 +33,14 @@ jobs:
       # 生成 HTML 文件并创建索引
       - name: Generate HTML and Index
         run: |
-          # 初始化 pages 目录
-          mkdir -p pages
-
-          # 遍历 posts 目录并按创建时间排序生成 HTML 和索引
+          # 初始化变量
+          items_per_page=19
+          index_count=0
+          page_index=1
+          post_list=""
           declare -A post_details
+
+          # 遍历 posts 目录，提取文章信息并按创建时间排序
           for dir in posts/*; do
             if [ -d "$dir" ]; then
               # 提取子目录名称作为文章标题
@@ -66,7 +69,7 @@ jobs:
               keywords=${keywords:-"leekblog,leek"}
 
               # 获取目录创建时间
-              creation_time=$(stat -c '%Y' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null)
+              creation_time=$(stat -c '%Y-%m-%d %H:%M:%S' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null)
               creation_time=${creation_time:-0}
 
               # 转换 Markdown 文件为 HTML
@@ -92,7 +95,7 @@ jobs:
                   <hr>
                 </header>
                 <main>
-                  <span>Created on: $(date -d @$creation_time '+%Y-%m-%d')</span>
+                  <span>Created on: $creation_time</span>
                   $post_content
                 </main>
                 <footer>
@@ -105,22 +108,18 @@ jobs:
 
               echo "生成文章 HTML: $html_file"
 
-              # 存储文章详情，按创建时间排序
+              # 累积文章条目，按时间排序
               post_details["$creation_time"]="<li><a href='/pages/${post_name}.html'>$post_name</a></li>"
             fi
           done
 
-          # 按创建时间排序并生成索引
-          items_per_page=19
-          index_count=0
-          page_index=1
-          post_list=""
-
-          for time in $(echo "${!post_details[@]}" | tr ' ' '\n' | sort -nr); do
-            post_list="${post_list}${post_details[$time]}" # 累积文章条目
+          # 按创建时间降序排序文章并分页生成索引文件
+          for time in $(echo "${!post_details[@]}" | sort -r); do
+            # 累积文章条目
+            post_list="${post_list}${post_details[$time]}"
             index_count=$((index_count + 1))
 
-            # 每 `items_per_page` 条文章生成新页面
+            # 每 `items_per_page` 条文章生成一个新页面
             if [ $((index_count % items_per_page)) -eq 0 ]; then
               if [ "$page_index" -eq 1 ]; then
                 page_file="index.html"
@@ -163,7 +162,7 @@ jobs:
             fi
           done
 
-          # 处理最后一页
+          # 处理最后一页内容
           if [ -n "$post_list" ]; then
             if [ "$page_index" -eq 1 ]; then
               page_file="index.html"
