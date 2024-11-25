@@ -34,8 +34,8 @@ jobs:
       - name: Generate HTML and Index
         run: |
 
-        # 确保 pages 目录存在
-        mkdir -p pages
+          # 确保 pages 目录存在
+          mkdir -p pages
           # 初始化变量
           items_per_page=19
           index_count=0
