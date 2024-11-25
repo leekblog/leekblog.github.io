@@ -1,238 +1,26 @@
-name: Process Posts with Dynamic Description and Index Sorting
+name: Get Post Directory Creation Time
 
 on:
   push:
-    paths:
-      - "posts/**"  # 监听 posts 目录下的变化
-      - '.github/workflows/index.yml'  # 更新工作流时触发
-  workflow_dispatch: # 支持手动触发
-
-permissions:
-  contents: write
+    branches:
+      - main
 
 jobs:
-  build:
+  get_creation_time:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout 仓库代码
-      - name: Checkout repository
+      - name: Checkout the repository
         uses: actions/checkout@v3
 
-      # 设置 Node.js 环境
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      # 安装依赖（需要 markdown 转 HTML 的工具，例如 `marked`）
-      - name: Install dependencies
+      - name: Get creation time of the posts directory
         run: |
-          npm install marked
-
-      # 扫描 posts 目录并生成 HTML 文件
-      - name: Generate HTML with description and keywords
-        run: |
-          # 初始化 pages 目录
-          mkdir -p pages
-
-          # 遍历 posts 目录，生成 HTML 文件
-          for dir in posts/*; do
-            if [ -d "$dir" ]; then
-              # 获取文章名称（目录名）
-              post_name=$(basename "$dir")
-
-              # 查找目录中的 Markdown 文件
-              md_file=$(find "$dir" -name "*.md" | head -n 1)
-              if [ -z "$md_file" ]; then
-                echo "目录 $dir 中没有 Markdown 文件，跳过"
-                continue
-              fi
-
-              # 生成描述：优先使用 description 文件内容
-              description_file="$dir/d"
-              if [ -f "$description_file" ]; then
-                description=$(cat "$description_file" | tr '\n' ' ')
-              else
-                description=$(head -n 1 "$md_file" | tr '\n' ' ')
-                description=$(cat "$description" | npx marked)
-              fi
-              if [ -z "$description" ]; then
-                description="This is a blog post on $post_name."
-              fi
-
-              # 生成关键词（检查是否存在 keywords 文件）
-              keywords_file="$dir/k"
-              if [ -f "$keywords_file" ]; then
-                keywords=$(cat "$keywords_file" | tr '\n' ',' | sed 's/,$//')
-              else
-                keywords="leekblog,leek"
-              fi
-
-              # 获取最后提交时间
-              commit_time=$(git log -1 --format=%cd --date=short "$md_file")
-              if [ -z "$commit_time" ]; then
-                echo "无法获取 $md_file 的最后提交时间"
-                continue
-              fi
-
-              # 将 Markdown 转换为 HTML
-              post_content=$(cat "$md_file" | npx marked)
-
-              # 创建文章的 HTML 文件
-              html_file="pages/${post_name}.html"
-              echo "<!DOCTYPE html>
-              <html lang='zh-CN'>
-              <head>
-                <meta charset='UTF-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                <title>$post_name | leek</title>
-                <link rel='stylesheet' href='/css/main.css'>
-                <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-                <meta name='description' content='$description'>
-                <meta name='keywords' content='$keywords'>
-              </head>
-              <body>
-              <header>
-                <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
-                <p class='description'>我是一棵葱,站在风雨中</p>
-                <hr>
-              </header>
-              <main>
-              <span>$commit_time</span>
-              $post_content
-              </main>
-              <footer>
-              <a href='mailto:leekblog@proton.me'><span class='about'>about me</span></a>
-              <br><br>
-              <span>leek.blog &copy; 2024</span>
-              </footer>
-              </body>
-              </html>" > "$html_file"
-              echo "生成文章 HTML: $html_file"
-            fi
-          done
-
-      # 生成 index 文件并保持分页
-      - name: Generate Index with sorted posts
-        run: |
-          post_list=""
-          post_count=0
-          items_per_page=19
-          page_index=1
-          max_pages=20
-
-          # 获取 posts 目录下所有子目录的最后提交时间并排序
-          for dir in posts/*; do
-            if [ -d "$dir" ]; then
-              post_name=$(basename "$dir")
-              md_file=$(find "$dir" -name "*.md" | head -n 1)
-              if [ -z "$md_file" ]; then
-                continue
-              fi
-
-              # 获取最后提交时间（格式化为 月/日）
-              commit_time=$(git log -1 --format=%cd --date=short "$md_file")
-              month_day=$(echo "$commit_time" | sed 's/-/\//')
-
-              post_list="$post_list<a href='/pages/${post_name}.html'><span>$post_name</span><span>$month_day</span></a>"
-
-              post_count=$((post_count + 1))
-
-              # 添加分页处理
-              if [ $((post_count % items_per_page)) -eq 0 ] && [ $post_count -gt 0 ]; then
-                if [ $page_index -eq 1 ]; then
-                  page_file="index.html"
-                else
-                  page_file="index${page_index}.html"
-                fi
-                echo "<!DOCTYPE html>
-                <html lang='zh-CN'>
-                <head>
-                  <meta charset='UTF-8'>
-                  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                  <link rel='stylesheet' href='/css/main.css'>
-                  <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-                  <meta name='description' content='leekblog,leek'>
-                  <meta name='keywords' content='leekblog,leek,blog'>
-                  <title>leek | blog</title>
-                </head>
-                <body>
-                <header>
-                  <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
-                  <p class='description'>我是一棵葱,站在风雨中</p>
-                  <hr>
-                </header>
-                <main>
-                  $post_list
-                </main>
-                <div class='pagination'>
-                  $(if [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>"; fi)
-                  $(seq 1 $page_index | awk '{print "<a href=\"index"$1".html\">" $1 "</a>"}')
-                  $(if [ $((post_count / max_pages)) -ge $page_index ]; then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi)
-                </div>
-                <footer>
-                  <a href='mailto:leekblog@proton.me'><span class='about'>about me</span></a>
-                  <br><br>
-                  <span>leek.blog &copy; 2024</span>
-                </footer>
-                </body>
-                </html>" > "$page_file"
-                echo "生成分页文件: $page_file"
-                post_list="" # 重置 post_list
-                page_index=$((page_index + 1))
-              fi
-            fi
-          done
-
-          # 处理最后一页
-          if [ ! -z "$post_list" ]; then
-            if [ $page_index -eq 1 ]; then
-              page_file="index.html"
-            else
-              page_file="index${page_index}.html"
-            fi
-            echo "<!DOCTYPE html>
-            <html lang='zh-CN'>
-            <head>
-              <meta charset='UTF-8'>
-              <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-              <link rel='stylesheet' href='/css/main.css'>
-              <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-              <meta name='description' content='leekblog,leek'>
-              <meta name='keywords' content='leekblog,leek,blog'>
-              <title>leek | 第$page_index页</title>
-            </head>
-            <body>
-            <header>
-              <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
-              <p class='description'>我是一棵葱,站在风雨中</p>
-              <hr>
-            </header>
-            <main>
-              $post_list
-            </main>
-            <div class='pagination'>
-              <a href='index.html'>首页</a>
-              $(if [ $page_index -gt 1 ]; then echo "<a href='index$((page_index - 1)).html'>Prev</a>"; fi)
-              $(seq 1 $page_index | awk '{print "<a href=\"index"$1".html\">" $1 "</a>"}')
-              $(if [ $((post_count / max_pages)) -ge $page_index ]; then echo "<a href='index$((page_index + 1)).html'>Next</a>"; fi)
-            </div>
-            <footer>
-              <a href='mailto:leekblog@proton.me'><span class='about'>about me</span></a>
-              <br><br>
-              <span>leek.blog &copy; 2024</span>
-            </footer>
-            </body>
-            </html>" > "$page_file"
-            echo "生成最后一页: $page_file"
+          # 获取 posts 目录的创建时间
+          creation_time=$(stat --format='%W' posts)
+          
+          # 如果创建时间不可用，stat命令会返回0，表示无法获取
+          if [ "$creation_time" -eq 0 ]; then
+            echo "Unable to fetch creation time of the posts directory."
+          else
+            echo "The creation time of the posts directory is: $(date -d @$creation_time)"
           fi
-
-      # 提交更改
-      - name: Commit changes
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "github-actions@github.com"
-          git add -A
-          git commit -m "Generated HTML pages and indexes"
-          git push
