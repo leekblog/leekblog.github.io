@@ -15,8 +15,9 @@ jobs:
 
       - name: Get last commit time of files in subdirectories in the posts folder
         run: |
-        
+
           # 获取 git 仓库中所有文件的最新修改时间
+          filename='/posts/*'
           $git ls-tree -r --name-only HEAD | while read filename; do
           echo "$(git log -1 --pretty=format:"%ad" -- $filename) $filename";
           done
