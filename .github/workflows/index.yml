@@ -1,200 +1,31 @@
-name: Process Posts with Dynamic Description
+name: Get Last Commit Time of Files in Subdirectories of Posts
 
 on:
   push:
-    paths:
-      - "posts/**" # 监听 posts 目录下的变化
-      - ".github/workflows/index.yml"  # 更新工作流时触发
-  workflow_dispatch: # 支持手动触发
-
-permissions:
-  contents: write
+    branches:
+      - main
 
 jobs:
-  build:
+  get_commit_times:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout 仓库代码
-      - name: Checkout repository
+      - name: Checkout the repository
         uses: actions/checkout@v3
 
-      # 设置 Node.js 环境
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      # 安装依赖
-      - name: Install dependencies
-        run: npm install marked
-
-      # 生成 HTML 和分页索引
-      - name: Generate HTML and index files
+      - name: Get last commit time of files in subdirectories in the posts folder
         run: |
-          mkdir -p pages
-          items_per_page=9
-          post_count=$(find posts -mindepth 1 -maxdepth 1 -type d | wc -l)
-          echo "文章数量: $post_count"
-
-          # 按目录创建时间排序
-          sorted_dirs=$(find posts -mindepth 1 -maxdepth 1 -type d -exec stat -c '%Y %n' {} \; | sort -n | awk '{print $2}')
-          
-          # 遍历每个目录生成 HTML
-          post_list=""
-          page_index=1
-          index_count=0
-          index_file_prefix="index"
-
-          for dir in $sorted_dirs; do
-            post_name=$(basename "$dir")
-            md_file=$(find "$dir" -name "*.md" | head -n 1)
-            if [ -z "$md_file" ]; then
-              echo "目录 $dir 中没有 Markdown 文件，跳过"
-              continue
-            fi
-
-            # 获取目录创建时间并格式化
-            creation_time=$(stat -c '%w' "$dir" 2>/dev/null || stat -f '%B' "$dir" 2>/dev/null | xargs -I{} date -d @{} +"%Y-%m-%d")
-            if [ -n "$creation_time" ]; then
-              month_day=$(echo "$creation_time" | cut -d'-' -f2,3 | tr '-' '/')
+          # 查找 posts 目录下的所有子目录
+          find posts -mindepth 1 -maxdepth 1 -type d | while read dir; do
+            # 获取子目录中所有文件的最后提交时间
+            last_commit_time=$(git log -1 --format=%ct -- "$dir"/*)
+            
+            # 如果没有提交记录
+            if [ -z "$last_commit_time" ]; then
+              echo "No commit found for files in directory: $dir"
             else
-              month_day="N/A"
+              # 获取最后提交文件的提交时间
+              last_commit_time=$(git log -1 --format=%ct -- "$dir"/*)
+              echo "$(basename "$dir")_$(date -d @$last_commit_time)"
             fi
-
-            # 生成描述
-            description_file="$dir/d"
-            if [ -f "$description_file" ]; then
-              description=$(cat "$description_file" | tr '\n' ' ')
-            else
-              description=$(head -n 1 "$md_file" | tr '\n' ' ')
-            fi
-            if [ -z "$description" ]; then
-              description="This is a blog post on $post_name."
-            fi
-
-            # 生成关键词
-            keywords_file="$dir/k"
-            if [ -f "$keywords_file" ]; then
-              keywords=$(cat "$keywords_file" | tr '\n' ',' | sed 's/,$//')
-            else
-              keywords="leekblog,leek"
-            fi
-
-            # 转换 Markdown 为 HTML 内容
-            post_content=$(cat "$md_file" | npx marked)
-
-            # 创建文章 HTML 文件
-            html_file="pages/${post_name}.html"
-            echo "<!DOCTYPE html>
-            <html lang='zh-CN'>
-            <head>
-              <meta charset='UTF-8'>
-              <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-              <title>$post_name | leek</title>
-              <link rel='stylesheet' href='/css/main.css'>
-              <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-              <meta name='description' content='$description'>
-              <meta name='keywords' content='$keywords'>
-            </head>
-            <body>
-              <header>
-                <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
-                <p class='description'>我是一棵葱,站在风雨中</p>
-                <hr>
-              </header>
-              <main>
-                <span>$month_day</span>
-                $post_content
-              </main>
-              <footer>
-                <a href='mailto:leekblog@proton.me'><span class='about'>about me</span></a>
-                <br><br>
-                <span>leek.blog &copy; 2024</span>
-              </footer>
-            </body>
-            </html>" > "$html_file"
-            echo "生成文章 HTML: $html_file"
-
-            # 更新索引内容
-            post_list="$post_list<a href='/pages/${post_name}.html'><span>$post_name</span><span>$month_day</span></a>"
-
-            # 每页处理 items_per_page 个项目
-            if [ $((index_count % items_per_page)) -eq 0 ] && [ $index_count -gt 0 ]; then
-              index_file="${index_file_prefix}${page_index}.html"
-              if [ $page_index -eq 1 ]; then
-                index_file="index.html"
-              fi
-              echo "<!DOCTYPE html>
-              <html lang='zh-CN'>
-              <head>
-                <meta charset='UTF-8'>
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                <title>leek | blog</title>
-                <link rel='stylesheet' href='/css/main.css'>
-                <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-              </head>
-              <body>
-                <header>
-                  <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
-                  <p class='description'>我是一棵葱,站在风雨中</p>
-                  <hr>
-                </header>
-                <main>
-                  $post_list
-                </main>
-                <footer>
-                  <span>Page $page_index</span>
-                </footer>
-              </body>
-              </html>" > "$index_file"
-              echo "生成索引文件: $index_file"
-              post_list=""
-              page_index=$((page_index + 1))
-            fi
-
-            index_count=$((index_count + 1))
           done
-
-          # 处理最后一页
-          if [ -n "$post_list" ]; then
-            index_file="${index_file_prefix}${page_index}.html"
-            if [ $page_index -eq 1 ]; then
-              index_file="index.html"
-            fi
-            echo "<!DOCTYPE html>
-            <html lang='zh-CN'>
-            <head>
-              <meta charset='UTF-8'>
-              <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-              <title>leek | blog</title>
-              <link rel='stylesheet' href='/css/main.css'>
-              <link rel='shortcut icon' href='/favicon.ico' type='image/x-icon'>
-            </head>
-            <body>
-              <header>
-                <a class='title' href='/'><p><span>www.</span>leek<span>.blog</span></p></a>
-                <p class='description'>我是一棵葱,站在风雨中</p>
-                <hr>
-              </header>
-              <main>
-                $post_list
-              </main>
-              <footer>
-                <span>Page $page_index</span>
-              </footer>
-            </body>
-            </html>" > "$index_file"
-            echo "生成索引文件: $index_file"
-          fi
-
-      # 提交更改
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pages/*.html index*.html
-          git commit -m "Update pages and index files"
-          git push
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
