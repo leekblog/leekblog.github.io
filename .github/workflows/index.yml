@@ -1,4 +1,4 @@
-name: Get Creation Times of Subdirectories in Posts
+name: Get Last Commit Time of Subdirectories in Posts
 
 on:
   push:
@@ -6,25 +6,25 @@ on:
       - main
 
 jobs:
-  get_creation_times:
+  get_commit_times:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Get creation time of subdirectories in the posts folder
+      - name: Get last commit time of subdirectories in the posts folder
         run: |
           # 查找 posts 目录下的所有子目录
           find posts -mindepth 1 -maxdepth 1 -type d | while read dir; do
-            # 获取子目录的创建时间
-            creation_time=$(stat --format='%W' "$dir")
+            # 获取子目录的最后提交时间
+            last_commit_time=$(git log -1 --format=%ct -- "$dir")
             
-            # 如果创建时间不可用，stat命令会返回0，表示无法获取
-            if [ "$creation_time" -eq 0 ]; then
-              echo "Unable to fetch creation time for directory: $dir"
+            # 如果没有提交记录
+            if [ -z "$last_commit_time" ]; then
+              echo "No commit found for directory: $dir"
             else
-              # 打印子目录的名称和创建时间
-              echo "$(basename "$dir")_$(date -d @$creation_time)"
+              # 打印子目录的名称和最后提交时间
+              echo "$(basename "$dir")_$(date -d @$last_commit_time)"
             fi
           done
