@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'posts/**'
-      - 'index.yml'
+      - '.github/workflows/index.yml'
  
 jobs:
   build_pages:
