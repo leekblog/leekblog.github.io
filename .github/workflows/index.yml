@@ -63,7 +63,7 @@ jobs:
               fi
 
               # 生成描述：优先使用 description 文件内容
-              description_file="$dir/description"
+              description_file="$dir/d"
               if [ -f "$description_file" ]; then
                 description=$(cat "$description_file" | tr '\n' ' ')
               else
@@ -76,7 +76,7 @@ jobs:
               fi
 
               # 生成关键词（检查是否存在 keywords 文件）
-              keywords_file="$dir/keywords"
+              keywords_file="$dir/k"
               if [ -f "$keywords_file" ]; then
                 keywords=$(cat "$keywords_file" | tr '\n' ',' | sed 's/,$//')
               else
