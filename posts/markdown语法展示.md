@@ -1,4 +1,4 @@
-# markdown全部语法展示
+# markdown语法展示
 
 2024-11-26
 
