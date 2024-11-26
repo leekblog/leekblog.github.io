@@ -1,0 +1,120 @@
+@charset "utf-8";
+
+main {
+    color: #000000a6;
+    font-size: 1.1rem;
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin-top: 0;
+        margin-bottom: .5em;
+        color: #000000d9;
+        font-weight: 500;
+        font-family: system-ui;
+    }
+
+    p {
+        margin-top: 0;
+        margin-bottom: 1em;
+        font-weight: 300;
+        line-height: 1.8rem;
+    }
+
+    a {
+        color: #1890ff;
+        text-decoration: none;
+        background-color: initial;
+        font-weight: 300;
+        outline: none;
+        cursor: pointer;
+        -webkit-transition: color .3s;
+        transition: color .3s;
+        -webkit-text-decoration-skip: objects;
+        line-height: 1.8rem;
+    }
+
+    a:active,
+    a:hover {
+        text-decoration: none;
+        outline: 0;
+    }
+
+    a:hover {
+        color: #40a9ff;
+    }
+
+    dl,
+    ol,
+    ul {
+        margin-top: 0;
+        margin-bottom: 1em;
+        line-height: 1.8rem;
+    }
+
+    blockquote {
+        display: block;
+        overflow: auto;
+        border-left: 3px solid #00000066;
+        background: #0000000d;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        padding-left: 1.2rem;
+        padding-right: 1rem;
+        margin: 0 0 1em;
+    }
+
+    code {
+        font-size: 14px;
+        word-wrap: break-word;
+        padding: 2px 4px;
+        border-radius: 4px;
+        margin: 0 2px;
+        color: #1e6bb8;
+        background-color: #1b1f230d;
+        font-family: Operator Mono, Consolas, Monaco, Menlo, monospace;
+        word-break: break-all;
+    }
+
+    table {
+        border-collapse: collapse;
+        margin-bottom: 1em;
+        line-height: 1.8rem;
+    }
+
+    table tr th,
+    table tr td {
+        border: 1px solid #ccc;
+        padding: .2rem .5rem;
+        text-align: left;
+    }
+
+    table tr th {
+        font-weight: bold;
+        background-color: #f0f0f0;
+    }
+
+    pre {
+        box-sizing: border-box;
+        width: 100%;
+        overflow: auto;
+        word-wrap: break-word !important;
+        color: #333;
+        background-color: #00000008;
+        border: 1px solid #f0f0f0;
+        border-radius: 2px;
+        display: inline-block;
+    }
+
+    pre code {
+        background-color: transparent;
+        color: #333;
+    }
+
+    img {
+        max-width: 100%;
+    }
+}

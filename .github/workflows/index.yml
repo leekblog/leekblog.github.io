@@ -1,0 +1,105 @@
+name: Build Blog Pages
+
+on:
+  push:
+    paths:
+      - '.github/workflows/index.yml'
+      - 'posts/**'
+      - '.conf'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install pandoc if cache not found
+        run: |
+          if ! command -v pandoc &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y pandoc
+          fi
+
+      - name: Process markdown files and generate HTML
+        run: |
+          # Create a directory to store generated HTML files
+          mkdir -p pages
+          
+          # include config
+          source .conf
+
+          # Initialize an empty array to store article info
+          article_list=""
+          site_description="$SITE_DESC"
+          site_copyright="$SITE_COPY"
+          site_sign="$SITE_SIGN"
+          site_name="$SITE_NAME"
+
+          # Loop through all markdown files in the 'posts' directory
+          for md_file in posts/*.md; do
+            if [ -f "$md_file" ]; then
+              # Get article title (file name without extension)
+              title=$(basename "$md_file" .md)
+              title=$(echo "$title" | sed 's/ /_/g')
+              # Convert markdown to HTML using pandoc
+              html_content=$(pandoc "$md_file" -t html --mathjax)
+
+              # Extract SEO description (first 200 characters of 4th line and after)
+              seo_description=$(sed -n '5,$p' "$md_file" | head -n 1 | cut -c 1-200)
+
+              if [ -z "$seo_description" ]; then
+                seo_description=$site_description
+              fi
+
+              # Write the HTML content to a file
+              echo "<!DOCTYPE html><html lang='zh-CN'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><link rel='shortcut icon' href='/asset/favicon.png' type='image/x-icon'><meta name="description" content='$seo_description'/><link rel='stylesheet' href='/asset/main.css'/><link rel='stylesheet' href='/asset/page.css'/><title>$title | $site_name</title></head><body><header><a class='title' href='/' target="_top"><img src="/asset/avatar.jpg" alt="avatar"><p>$site_name</p></a><p class='description'>$site_sign</p></header><main>$html_content</main><footer><span>$site_copyright</span></footer></body></html>" > "pages/$title.html"
+
+              # Extract date from the 3rd line or set default date if not found
+              date_line=$(sed -n '3p' "$md_file")
+
+              # Filter out non-digits, non-"-", non-"/" and non-space characters, and check if the characters are between 6 and 8.
+              clean_date=$(echo "$date_line" | tr -cd '0-9-/ ')
+              clean_date_length=${#clean_date}
+              if [[ $clean_date_length -ge 8 && $clean_date_length -le 10 ]]; then
+                date=$(echo "$date_line" | sed 's/[ \/]/-/g')
+              else
+                date="9999-99-99"
+              fi
+
+              # Store article name and date in the list
+              article_list="$article_list$date|$title "
+            fi
+          done
+
+          # Sort articles based on the date
+          sorted_articles=$(echo "$article_list" | tr ' ' '\n' | sort -t'|' -k1,1 -r)
+
+          # Generate the index.html file with the sorted articles
+          main_content="<main>"
+          for article in $sorted_articles; do
+            date=$(echo "$article" | cut -d '|' -f 1)
+            title=$(echo "$article" | cut -d '|' -f 2)
+            # Extract month/day from date for display
+            month_day=$(echo "$date" | sed -E 's/([0-9]{4}[-/ ]?)([0-9]{1,2})[-/ ]?([0-9]{1,2})/\2\/\3/')
+            year=${date:0:4}
+            main_content="$main_content<a href='/pages/$title.html'><span>$title</span><span>$(if [[ ! $(date +%Y) == "$year" ]]; then echo "$year "; fi)$month_day</span></a><br>"
+          done
+          main_content="$main_content</main>"
+
+          # Write the index.html content
+          echo "<!DOCTYPE html><html lang='zh-CN'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><link rel='shortcut icon' href='asset/favicon.png' type='image/x-icon'><meta name="description" content="$site_description"><link rel='stylesheet' href='asset/main.css'><title>$site_name</title></head><body><header><a class='title' href='/' target="_top"><img src="asset/avatar.jpg" alt="avatar"><p>$site_name</p></a><p class='description'>$site_sign</p></header><main>$main_content</main></body></html>" > index.html
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add index.html pages/*.html
+          git commit -m "Update index.html and pages"
+          git push
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
