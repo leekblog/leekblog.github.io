@@ -5,7 +5,6 @@ on:
     paths:
       - '.github/workflows/index.yml'
       - 'posts/**'
-      - 'asset/**'
       - '.conf'
 
 permissions:
