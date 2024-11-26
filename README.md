@@ -2,7 +2,7 @@
 
 <div align=center>
 
-![](.github/preview.png)
+![](.github/Preview.png)
 
 <div align=left>
 
