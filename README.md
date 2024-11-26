@@ -1,5 +1,7 @@
 # Leek.blog
 
+![预览图](.github/Preview.png "预览图")
+
 ### 使用指南
 
 GitHub静态博客生，使用Actions构建部署的单页程序。功能简单，使用较为方便。
