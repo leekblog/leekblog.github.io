@@ -1,6 +1,11 @@
 # Leek.blog
 
-![预览图](.github/Preview.png "预览图")
+<div align=center>
+
+![](.github/Preview.png)
+
+<div align=left>
+
 
 ### 使用指南
 
