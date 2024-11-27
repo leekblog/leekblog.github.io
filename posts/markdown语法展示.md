@@ -253,7 +253,3 @@ Markdown Nice 这么好用，简直是{喜大普奔|hē hē hē hē}呀！
 
 <span style="display:block;text-align:right;color:orangered;">橙色居右</span>
 <span style="display:block;text-align:center;color:orangered;">橙色居中</span>
-
-### 4.2 UML
-
-不支持，推荐使用开源工具`https://draw.io/`制作后再导入图片

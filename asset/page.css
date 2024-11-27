@@ -22,7 +22,8 @@ main {
         margin-top: 0;
         margin-bottom: 1em;
         font-weight: 300;
-        line-height: 1.8rem;
+        line-height: 2rem;
+        line-break: anywhere;
     }
 
     a {
@@ -35,7 +36,7 @@ main {
         -webkit-transition: color .3s;
         transition: color .3s;
         -webkit-text-decoration-skip: objects;
-        line-height: 1.8rem;
+        line-height: 2rem;
     }
 
     a:active,
@@ -53,7 +54,7 @@ main {
     ul {
         margin-top: 0;
         margin-bottom: 1em;
-        line-height: 1.8rem;
+        line-height: 2rem;
     }
 
     blockquote {
@@ -81,7 +82,7 @@ main {
     table {
         border-collapse: collapse;
         margin-bottom: 1em;
-        line-height: 1.8rem;
+        line-height: 2rem;
     }
 
     table tr th,
