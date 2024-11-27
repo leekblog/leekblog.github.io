@@ -102,7 +102,7 @@ main {
         overflow: auto;
         word-wrap: break-word !important;
         color: #333;
-        background-color: #00000008;
+        background-color: #f3f3f3;
         border: 1px solid #f0f0f0;
         border-radius: 2px;
         display: inline-block;
