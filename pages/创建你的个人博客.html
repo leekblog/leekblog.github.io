@@ -24,16 +24,20 @@
 <p>注册 cloudflare 时，也可以使用匿名邮箱。</p>
 <p>注册 github 时，也可以使用匿名邮箱。</p>
 <h3 id="步骤2创建-github仓库">步骤2：创建 github仓库</h3>
-<p>在右上角点击加号选择 <code>New repository</code> , <code>Repository name</code> 下方输入框填入 <code>你账户的名字.github.io</code> ，<code>Description</code> 随意写，其他不变，点击 <a href=""><code>Create repository</code></a> 创建储存库。</p>
-<p><strong><a href=""><code>可选步骤</code></a></strong> 点击 <code>creating a new file</code> 创建名为index.html的文件，内容随意写。点击 <code>Commit changes</code> 按钮提交内容。</p>
-<p>来到仓库的 <code>Settings</code>，找到 <code>Pages</code>。将 <code>Branch</code> 下方的 <a href=""><code>None</code></a> 改成 <a href=""><code>Main</code></a> <a href=""><code>Root</code></a> 保存</p>
-<p>等待几分钟后再次进入 <code>Pages</code> ，保存顶部出现的 <code>Your site is live at http://你的用户名.github.io</code> 中的域名</p>
-<p>接下来将你的域名填入下方的 <code>Custom domain</code> 中保存</p>
+<ol type="1">
+<li><p>在右上角点击加号选择 <code>New repository</code> , <code>Repository name</code> 下方输入框填入 <code>你账户的名字.github.io</code> ，<code>Description</code> 随意写，其他不变，点击 <a href=""><code>Create repository</code></a> 创建储存库。</p></li>
+<li><p><strong><a href=""><code>可选步骤</code></a></strong> 点击 <code>creating a new file</code> 创建名为index.html的文件，内容随意写。点击 <code>Commit changes</code> 按钮提交内容。</p></li>
+<li><p>来到仓库的 <code>Settings</code>，找到 <code>Pages</code>。将 <code>Branch</code> 下方的 <a href=""><code>None</code></a> 改成 <a href=""><code>Main</code></a> <a href=""><code>Root</code></a> 保存</p></li>
+<li><p>等待几分钟后再次进入 <code>Pages</code> ，保存顶部出现的 <code>Your site is live at http://你的用户名.github.io</code> 中的域名</p></li>
+<li><p>接下来将你的域名填入下方的 <code>Custom domain</code> 中保存</p></li>
+</ol>
 <h3 id="步骤3使用第三方-dns服务">步骤3：使用第三方 DNS服务</h3>
-<p>由于 namesilo 的域名控制台并不好用，所以需要使用第三方的DNS服务。</p>
-<p>进入 cloudflare 控制台[添加域] &gt; [填入域名] &gt; [选择 Free 计划] &gt; [更新名称服务器] 复制您的已分配的 Cloudflare 名称服务器（<code>lorna.ns.cloudflare.com</code>、<code>rex.ns.cloudflare.com</code>）</p>
-<p>进入 namesilo 的域名控制台[Domains Manager] &gt; [NameServer Manager] &gt; 更改 <code>NameServer 1</code> 和 <code>NameServer 2</code> 的值为cloudflare里分配给你的 cloudflare 名称服务器（<code>lorna.ns.cloudflare.com</code>、<code>rex.ns.cloudflare.com</code>）</p>
-<p>等待数分钟后刷新网页，如果状态从 <code>待处理的名称服务器更新</code> 变成 <code>活动</code> 就可以进行DNS解析了，从右侧边栏找到 <code>DNS记录</code> 进入，删除所有DNS记录，添加两条 <code>CNAME</code> 类型的解析记录，一条名称填 <code>www</code> ，另一条名称填 <code>@</code>，目标填写github中保存的 <code>你的用户名.github.io</code> 点击保存。</p>
-<p>等待几小时或者更换网络，你的域名应该就能访问github上的页面了。</p>
+<ol type="1">
+<li><p>由于 namesilo 的域名控制台并不好用，所以需要使用第三方的DNS服务。</p></li>
+<li><p>进入 cloudflare 控制台[添加域] &gt; [填入域名] &gt; [选择 Free 计划] &gt; [更新名称服务器] 复制您的已分配的 Cloudflare 名称服务器（<code>lorna.ns.cloudflare.com</code>、<code>rex.ns.cloudflare.com</code>）</p></li>
+<li><p>进入 namesilo 的域名控制台[Domains Manager] &gt; [NameServer Manager] &gt; 更改 <code>NameServer 1</code> 和 <code>NameServer 2</code> 的值为cloudflare里分配给你的 cloudflare 名称服务器（<code>lorna.ns.cloudflare.com</code>、<code>rex.ns.cloudflare.com</code>）</p></li>
+<li><p>等待数分钟后刷新网页，如果状态从 <code>待处理的名称服务器更新</code> 变成 <code>活动</code> 就可以进行DNS解析了，从右侧边栏找到 <code>DNS记录</code> 进入，删除所有DNS记录，添加两条 <code>CNAME</code> 类型的解析记录，一条名称填 <code>www</code> ，另一条名称填 <code>@</code>，目标填写github中保存的 <code>你的用户名.github.io</code> 点击保存。</p></li>
+<li><p>等待几小时或者更换网络，你的域名应该就能访问github上的页面了。</p></li>
+</ol>
 <h2 id="安装-leek.blog-静态个人博客">安装 <code>Leek.blog 静态个人博客</code></h2>
-<p>敬请期待…</p></main><footer><span>leek © 2024</span></footer></body></html>
+<pre><code>敬请期待...</code></pre></main><footer><span>leek © 2024</span></footer></body></html>
