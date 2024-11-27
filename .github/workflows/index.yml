@@ -51,7 +51,7 @@ jobs:
 
               # Extract SEO description (first 200 characters of 4th line and after)
               seo_description=$(sed -n '5,$p' "$md_file" | head -n 1 | cut -c 1-200)
-              seo_description=$(pandoc "$seo_description" -t html --mathjax)
+
               if [ -z "$seo_description" ]; then
                 seo_description=$site_description
               fi
