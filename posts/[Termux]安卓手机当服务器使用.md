@@ -19,11 +19,15 @@ A2024/11/27
 
 - 更新可用软件包
 
-    pkg upgrade
+``` shell
+pkg upgrade
+```
 
 - 安装所有软件包
 
-    pkg install tsu vim apache2 php php-fpm php-apache phpmyadmin mariadb
+``` shell
+pkg install tsu vim apache2 php php-fpm php-apache phpmyadmin mariadb
+```
 
 在安装过程中需要确认安装，按"Y"回车。
 
@@ -31,44 +35,50 @@ A2024/11/27
 
 创建共享目录，方便Termux和Android的文件共享
 
-    termux-setup-storage
+``` shell
+termux-setup-storage
+```
 
 ### Apache
 修改Apache配置文件  httpd.conf
 
-    vim /data/data/com.termux/files/usr/etc/apache2/httpd.conf
+``` shell
+vim /data/data/com.termux/files/usr/etc/apache2/httpd.conf
+```
 
 进入vim编辑器后：按 'i' 进入编辑模式。esc退出编辑。退出编辑后按 ':’ 进入命令模式。 ':q' 退出vim编辑器。 ':exit' 保存后退出。更多用法菜鸟教程Linux vi/vim
 
-    52|  Listen 80  #修改80端口
-    
-    66|  LoadModule mpm_prefork_module...  #去掉开头的井号"#"
-    
-    67|  #LoadModule mpm_worker_module... #在开头加上井号 "#"
- 
-    #在162行下方新增代码。
+``` shell
+52|  Listen 80  #修改80端口
 
-    162|  LoadModule php_module /data/data/com.termux/files/usr/libexec/apache2/libphp.so  
+66|  LoadModule mpm_prefork_module...  #去掉开头的井号"#"
 
-    231|  Require all granted  #将 denied 修改为 granted
+67|  #LoadModule mpm_worker_module... #在开头加上井号 "#"
 
-    246|  DocumentRoot "/storage/emulated/0/htdocs"   #将这行代码中的路径替换成/storage/emulated/0/，这是你手机的主目录，可以随意指定
+#在162行下方新增代码。
 
-    247|  <Directory "/storage/emulated/0/htdocs" >  #这行跟上一行的路径一样即可
+162|  LoadModule php_module /data/data/com.termux/files/usr/libexec/apache2/libphp.so  
 
-    #在261行下方新增代码。
-    261|  <IfModule php_module>
-    262|      php_flag magic_quotes_gpc Off
-    263|      php_flag track_vars On
-    264|      php_flag register_globals Off
-    265|      php_value include_pach .
-    266|  </IfModule>
+231|  Require all granted  #将 denied 修改为 granted
 
-    286|  DirectoryIndex index.php index.php3 index.html index.htm  #新增php,php3,htm后缀
+246|  DocumentRoot "/storage/emulated/0/htdocs"   #将这行代码中的路径替换成/storage/emulated/0/，这是你手机的主目录，可以随意指定
 
-    #在423行下方新增代码。
-    423|  AddType application/x-httpd-php .php
-    424|  AddType application/x-httpd-php .php3
+247|  <Directory "/storage/emulated/0/htdocs" >  #这行跟上一行的路径一样即可
+
+#在261行下方新增代码。
+261|  <IfModule php_module>
+262|      php_flag magic_quotes_gpc Off
+263|      php_flag track_vars On
+264|      php_flag register_globals Off
+265|      php_value include_pach .
+266|  </IfModule>
+
+286|  DirectoryIndex index.php index.php3 index.html index.htm  #新增php,php3,htm后缀
+
+#在423行下方新增代码。
+423|  AddType application/x-httpd-php .php
+424|  AddType application/x-httpd-php .php3
+```
 
 保存httpd.conf后退出vim
 
@@ -86,12 +96,16 @@ A2024/11/27
 ### phpMyAdmin
 修改phpmyadmin配置文件 config.inc.php
 
-    vim /data/data/com.termux/files/usr/etc/phpmyadmin/config.inc.php
+``` shell
+vim /data/data/com.termux/files/usr/etc/phpmyadmin/config.inc.php
+```
 
 修改代码
 
-    30|  $cfg["Server"][$i]["host"] = '127.0.0.1'  #将localhost 改为 127.0.0.1 以建立TCP连接
-    32|  $cfg["Server"][$i]["AllowNoPassword"] =true  #将 false 改为 true 以允许空密码登录
+``` shell
+30|  $cfg["Server"][$i]["host"] = '127.0.0.1'  #将localhost 改为 127.0.0.1 以建立TCP连接
+32|  $cfg["Server"][$i]["AllowNoPassword"] =true  #将 false 改为 true 以允许空密码登录
+```
 
 保存config.inc.php后退出vim
 
@@ -105,11 +119,15 @@ PHP
 
 php配置文件在 /data/data/com.termux/files/usr/lib/php.ini
 
-    vim /data/data/com.termux/files/usr/lib/php.ini
+``` shell
+vim /data/data/com.termux/files/usr/lib/php.ini
+```
 
 如果文件不存在执行下面代码
 
-    cp /data/data/com.termux/files/usr/share/doc/php/php.ini-production /data/data/com.termux/files/usr/lib/php.ini 
+``` shell
+cp /data/data/com.termux/files/usr/share/doc/php/php.ini-production /data/data/com.termux/files/usr/lib/php.ini 
+```
 
 按需求修改即可。
 
