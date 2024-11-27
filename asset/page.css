@@ -107,6 +107,7 @@ main {
         border: 1px solid #f0f0f0;
         border-radius: 2px;
         display: inline-block;
+        padding: 1rem;
     }
 
     pre code {
