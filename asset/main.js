@@ -4,5 +4,7 @@ if (document.querySelector("code.sourceCode") != null) {
     document.head.appendChild(script);
     script.onload = function () {
         hljs.highlightAll();
+        console.clear();
+        console.log("highlightAll");
     };
 }
