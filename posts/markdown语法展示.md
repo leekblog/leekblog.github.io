@@ -4,11 +4,9 @@
 
 本文展示markdown的全部语法
 
->微信公众号排版工具。问题或建议，请公众号留言。**[程序员翻身](#jump_8)**
+>跳转**[程序员翻身](#jump_1)**，跳转到id为jump_1的a标签处。
 
 建议使用 **Chrome** 浏览器，体验最佳效果。
-
-使用微信公众号编辑器有一个十分头疼的问题：粘贴出来的代码，格式错乱，空间小还带行号，而且特别丑。Markdown.com.cn编辑器能够解决这个问题。
 
 Markdown是一种轻量级的「标记语言」。
 
@@ -84,7 +82,7 @@ Markdown是一种轻量级的「标记语言」。
 微信公众号仅支持公众号文章链接，即域名为`https://mp.weixin.qq.com/`的合法链接。使用方法如下所示：
 
 对于该论述，欢迎读者查阅之前发过的文章，[你是《未来世界的幸存者》么？](https://mp.weixin.qq.com/s/s5IhxV2ooX3JN_X416nidA)
-<a id="jump_8"></a>
+<a id="jump_1"></a>
 ### 2.8 图片
 
 插入图片，格式如下：
@@ -245,7 +243,7 @@ Markdown Nice 这么好用，简直是{喜大普奔|hē hē hē hē}呀！
 
 通过`<![](url),![](url)>`这种语法设置横屏滑动滑动片，具体用法如下：
 
-<![蓝1](https://markdown.com.cn/images/blue.jpg),![绿2](https://markdown.com.cn/images/green.jpg),![红3](https://markdown.com.cn.jpg)>
+<![蓝1](https://markdown.com.cn/images/blue.jpg),![绿2](https://markdown.com.cn/images/green.jpg),![红3](https://markdown.com.cn/images/red.jpg)>
 
 ## 4 其他语法
 
@@ -259,12 +257,3 @@ Markdown Nice 这么好用，简直是{喜大普奔|hē hē hē hē}呀！
 ### 4.2 UML
 
 不支持，推荐使用开源工具`https://draw.io/`制作后再导入图片
-
-
-## 5 致谢
-
-* 歌词经理 [wechat-fromat](https://github.com/lyricat/wechat-format "灵感来源")
-* 颜家大少 [MD2All](http://md.aclickall.com/ "MdA2All")
-
-
-
