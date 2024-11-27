@@ -19,13 +19,13 @@
 
 - 更新可用软件包
 
-``` shell
+```shell
 pkg upgrade
 ```
 
 - 安装所有软件包
 
-``` shell
+```shell
 pkg install tsu vim apache2 php php-fpm php-apache phpmyadmin mariadb
 ```
 
@@ -35,20 +35,20 @@ pkg install tsu vim apache2 php php-fpm php-apache phpmyadmin mariadb
 
 创建共享目录，方便Termux和Android的文件共享
 
-``` shell
+```shell
 termux-setup-storage
 ```
 
 ### Apache
 修改Apache配置文件  httpd.conf
 
-``` shell
+```shell
 vim /data/data/com.termux/files/usr/etc/apache2/httpd.conf
 ```
 
 进入vim编辑器后：按 'i' 进入编辑模式。esc退出编辑。退出编辑后按 ':’ 进入命令模式。 ':q' 退出vim编辑器。 ':exit' 保存后退出。更多用法菜鸟教程Linux vi/vim
 
-``` shell
+```shell
 52|  Listen 80  #修改80端口
 
 66|  LoadModule mpm_prefork_module...  #去掉开头的井号"#"
@@ -96,13 +96,13 @@ vim /data/data/com.termux/files/usr/etc/apache2/httpd.conf
 ### phpMyAdmin
 修改phpmyadmin配置文件 config.inc.php
 
-``` shell
+```shell
 vim /data/data/com.termux/files/usr/etc/phpmyadmin/config.inc.php
 ```
 
 修改代码
 
-``` shell
+```shell
 30|  $cfg["Server"][$i]["host"] = '127.0.0.1'  #将localhost 改为 127.0.0.1 以建立TCP连接
 32|  $cfg["Server"][$i]["AllowNoPassword"] =true  #将 false 改为 true 以允许空密码登录
 ```
@@ -119,13 +119,13 @@ PHP
 
 php配置文件在 /data/data/com.termux/files/usr/lib/php.ini
 
-``` shell
+```shell
 vim /data/data/com.termux/files/usr/lib/php.ini
 ```
 
 如果文件不存在执行下面代码
 
-``` shell
+```shell
 cp /data/data/com.termux/files/usr/share/doc/php/php.ini-production /data/data/com.termux/files/usr/lib/php.ini 
 ```
 
