@@ -36,10 +36,12 @@ GitHub静态博客生，使用Actions构建部署的单页程序。功能简单�
 .github/
     workflows/
         index.yml
+    Preview.png
 asset/
     avatar.jpg
     favicon.png
     main.css
+    main.js
     page.css
 pages/
 posts/
