@@ -1,6 +1,6 @@
 # 安卓手机当服务器使用 [Termux] [ROOT]
 
-2024/11/27
+A2024/11/27
 
 > 旧手机当网页web服务器，把Apache2 PHP phpMyAdmin MariaDB装进手机，可以访问PHP页面，通过phpMyAdmin访问数据库。适合有ROOT权限的手机。
 
