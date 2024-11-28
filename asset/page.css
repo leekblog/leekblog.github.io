@@ -69,6 +69,10 @@ main {
         margin: 0 0 1em;
     }
 
+    iframe{
+        width: 100%;
+    }
+
     code {
         word-wrap: break-word;
         padding: 2px 4px;
