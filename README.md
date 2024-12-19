@@ -53,8 +53,4 @@ README.md
 
 ### 其他
 
-我的邮箱：[proton.me](mailto:leekblog@proton.me "proton.me匿名邮箱")
-
-我的博客：[www.leek.blog](https://www.leek.blog "我的博客")
-
 软件开源许可：MIT
