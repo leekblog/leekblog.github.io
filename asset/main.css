@@ -1,16 +1,19 @@
 @charset "utf-8";
 
-
 html,
 body {
     margin: 0 auto;
     padding: 0 auto;
     font-size: 12px;
-    font-family: Courier New,monospace;
+    font-family: Courier New, monospace;
     font-weight: 300;
     color: #292929;
     max-width: 50rem;
     width: 90%;
+}
+
+::-webkit-scrollbar {
+    display: none;
 }
 
 hr {
@@ -18,18 +21,18 @@ hr {
     border-bottom: 1px solid #c0c0c0;
 }
 
-header{
+header {
     padding-top: 5rem;
     padding-bottom: 1rem;
     text-align: center;
 }
 
-.title{
+.title {
     text-decoration: none;
     color: #292929;
 }
 
-.title>img{
+.title>img {
     border-radius: 50%;
     max-width: 8rem;
 }
@@ -54,17 +57,18 @@ main>a {
     justify-content: space-between;
     line-height: 3rem;
 }
-main>a:link{
+
+main>a:link {
     color: #292929;
 }
 
-main>a:hover{
+main>a:hover {
     transform: scale(1.01);
     transition: transform .2s;
     color: blue;
 }
 
-main>a:active{
+main>a:active {
     color: red;
 }
 
@@ -100,7 +104,8 @@ main {
     margin-top: 1rem;
 }
 
-.pagination>a,.pagination{
+.pagination>a,
+.pagination {
     text-align: center;
     text-decoration: none;
     color: #292929;
@@ -114,7 +119,7 @@ footer {
     margin-bottom: 4rem;
 }
 
-footer a{
+footer a {
     color: #292929;
     text-decoration: none;
 }
