@@ -38,7 +38,7 @@ GitHub静态博客生，使用Actions构建部署的单页程序。功能简单�
         index.yml
     Preview.png
 asset/
-    avatar.jpg
+    avatar.webp
     favicon.png
     main.css
     main.js
