@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><link rel='shortcut icon' href='/asset/favicon.png' type='image/x-icon'><meta name=description content='旧手机当网页web服务器，把Apache2 PHP phpMyAdmin MariaDB装进手机，可以访问PHP页面，通过phpMyAdmin访问数据库。适合有ROOT权限的手机。'/><link rel='stylesheet' href='/asset/main.css'/><link rel='stylesheet' href='/asset/page.css'/><title>[Termux]安卓手机当服务器使用 | 里克·博洛格</title></head><body><header><a class='title' href='/' target=_top><img src=/asset/avatar.jpg alt=avatar><p>里克·博洛格</p></a><p class='description'>蛰伏积蓄,静观其变,伺机而动</p></header><main><h1 id="安卓手机当服务器使用-termux-root">安卓手机当服务器使用 [Termux] [ROOT]</h1>
+<p>2024/11/27</p>
+<p>旧手机当网页web服务器，把Apache2 PHP phpMyAdmin MariaDB装进手机，可以访问PHP页面，通过phpMyAdmin访问数据库。适合有ROOT权限的手机。</p>
+<h3 id="下面开始安装-termux-app部署web运行环境">下面开始安装 Termux APP，部署web运行环境</h3>
+<p>前提准备： - 已经root的安卓手机 - (没有root可以尝试解锁BL，刷入适合你手机的TWRP Recovery，再通过twrp刷入magisk，最后使用magisk进行ROOT授权)</p>
+<p>下载 Termux APP - (推荐Google Play商店下载，或者GitHub)</p>
+<h2 id="第一步前置部署">第一步：前置部署</h2>
+<p>安装 <code>tsu</code> <code>vim</code> <code>apache2</code> <code>php</code> <code>php-fpm</code> <code>php-apache</code> <code>phpmyadmin</code> <code>mariadb</code></p>
+<ul>
+<li>更新可用软件包</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="ex">pkg</span> upgrade</span></code></pre></div>
+<ul>
+<li>安装所有软件包</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="ex">pkg</span> install tsu vim apache2 php php-fpm php-apache phpmyadmin mariadb</span></code></pre></div>
+<p>在安装过程中需要确认安装，按“Y”回车。</p>
+<h2 id="第二步配置环境">第二步：配置环境</h2>
+<p>创建共享目录，方便Termux和Android的文件共享</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="ex">termux-setup-storage</span></span></code></pre></div>
+<h3 id="apache">Apache</h3>
+<p>修改Apache配置文件 httpd.conf</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="ex">vim</span> /data/data/com.termux/files/usr/etc/apache2/httpd.conf</span></code></pre></div>
+<p>进入vim编辑器后：按 ‘i’ 进入编辑模式。esc退出编辑。退出编辑后按 ‘:’ 进入命令模式。 ‘:q’ 退出vim编辑器。 ‘:exit’ 保存后退出。更多用法菜鸟教程Linux vi/vim</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="ex">52</span><span class="kw">|</span>  <span class="ex">Listen</span> 80  #修改80端口</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a><span class="ex">66</span><span class="kw">|</span>  <span class="ex">LoadModule</span> mpm_prefork_module...  #去掉开头的井号<span class="st">&quot;#&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a><span class="ex">67</span><span class="kw">|</span>  #<span class="ex">LoadModule</span> mpm_worker_module... #在开头加上井号 <span class="st">&quot;#&quot;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a><span class="co">#在162行下方新增代码。</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a><span class="ex">162</span><span class="kw">|</span>  <span class="ex">LoadModule</span> php_module /data/data/com.termux/files/usr/libexec/apache2/libphp.so  </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true"></a><span class="ex">231</span><span class="kw">|</span>  <span class="ex">Require</span> all granted  #将 denied 修改为 granted</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true"></a><span class="ex">246</span><span class="kw">|</span>  <span class="ex">DocumentRoot</span> <span class="st">&quot;/storage/emulated/0/htdocs&quot;</span>   #将这行代码中的路径替换成/storage/emulated/0/，这是你手机的主目录，可以随意指定</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true"></a><span class="ex">247</span><span class="kw">|</span>  <span class="op">&lt;</span><span class="ex">Directory</span> <span class="st">&quot;/storage/emulated/0/htdocs&quot;</span> <span class="op">&gt;</span>  #这行跟上一行的路径一样即可</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true"></a><span class="co">#在261行下方新增代码。</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true"></a><span class="ex">261</span><span class="kw">|</span>  <span class="op">&lt;</span><span class="ex">IfModule</span> php_module<span class="op">&gt;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true"></a><span class="ex">262</span><span class="kw">|</span>      <span class="ex">php_flag</span> magic_quotes_gpc Off</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true"></a><span class="ex">263</span><span class="kw">|</span>      <span class="ex">php_flag</span> track_vars On</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true"></a><span class="ex">264</span><span class="kw">|</span>      <span class="ex">php_flag</span> register_globals Off</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true"></a><span class="ex">265</span><span class="kw">|</span>      <span class="ex">php_value</span> include_pach .</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true"></a><span class="ex">266</span><span class="kw">|</span>  <span class="op">&lt;</span>/<span class="ex">IfModule</span><span class="op">&gt;</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true"></a><span class="ex">286</span><span class="kw">|</span>  <span class="ex">DirectoryIndex</span> index.php index.php3 index.html index.htm  #新增php,php3,htm后缀</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true"></a><span class="co">#在423行下方新增代码。</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true"></a><span class="ex">423</span><span class="kw">|</span>  <span class="ex">AddType</span> application/x-httpd-php .php</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true"></a><span class="ex">424</span><span class="kw">|</span>  <span class="ex">AddType</span> application/x-httpd-php .php3</span></code></pre></div>
+<p>保存httpd.conf后退出vim</p>
+<p>运行 <code>sudo httpd</code> 启动apache服务</p>
+<p>浏览器打开 <code>localhost</code> 访问。</p>
+<p><code>sudo httpd -k stop</code> 用于停止apache服务</p>
+<h3 id="mysql">MySql</h3>
+<p>新开Termux会话，执行 <code>nohup mysqld &amp;</code> 或者直接执行 <code>mysqld</code> 运行数据库服务。</p>
+<h3 id="phpmyadmin">phpMyAdmin</h3>
+<p>修改phpmyadmin配置文件 config.inc.php</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="ex">vim</span> /data/data/com.termux/files/usr/etc/phpmyadmin/config.inc.php</span></code></pre></div>
+<p>修改代码</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="ex">30</span><span class="kw">|</span>  <span class="va">$cfg[</span><span class="st">&quot;Server&quot;</span><span class="va">]</span>[<span class="va">$i</span>][<span class="st">&quot;host&quot;</span>] = <span class="st">&#39;127.0.0.1&#39;</span>  #将<span class="ex">localhost</span> 改为 127.0.0.1 以建立TCP连接</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a><span class="ex">32</span><span class="kw">|</span>  <span class="va">$cfg[</span><span class="st">&quot;Server&quot;</span><span class="va">]</span>[<span class="va">$i</span>][<span class="st">&quot;AllowNoPassword&quot;</span>] =<span class="fu">true</span>  #将 false 改为 true 以允许空密码登录</span></code></pre></div>
+<p>保存config.inc.php后退出vim</p>
+<p>浏览器打开 <code>localhost/phpmyadmin</code> 访问。</p>
+<p>新增phpmyadmin账户时将主机名的 <code>%</code> 改成 <code>127.0.0.1</code></p>
+<p>安装程序时数据库地址填写 <code>127.0.0.1</code> PHP 修改php配置 php.ini</p>
+<p>php配置文件在 /data/data/com.termux/files/usr/lib/php.ini</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="ex">vim</span> /data/data/com.termux/files/usr/lib/php.ini</span></code></pre></div>
+<p>如果文件不存在执行下面代码</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="fu">cp</span> /data/data/com.termux/files/usr/share/doc/php/php.ini-production /data/data/com.termux/files/usr/lib/php.ini </span></code></pre></div>
+<p>按需求修改即可。</p>
+<h2 id="end">END</h2>
+<p>先执行 <code>sudo httpd</code> 启动Apache服务再新开会话执行 <code>nohup mysqld &amp;</code> 启动mysql服务</p></main><footer><span>github © 2024</span></footer><script src=/asset/main.js></script></body></html>
